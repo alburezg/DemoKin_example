@@ -1,0 +1,18 @@
+Where each relative type is identified by a unique code:
+  
+  |Code |Relative                                   |
+  |:----|:------------------------------------------|
+  |coa  |Cousins (through aunt older than mother)   |
+  |cya  |Cousins (through aunt younger than mother) |
+  |d    |Daughter                                   |
+  |gd   |Grand-daughter                             |
+  |ggm  |Great-grandmother                          |
+  |gm   |Grandmother                                |
+  |m    |Mother                                     |
+  |nos  |Nieces through older sister                |
+  |nys  |Nieces through younger sister              |
+  |oa   |Aunt older than mother                     |
+  |ya   |Aunt younger than mother                   |
+  |os   |Older sister                               |
+  |ys   |Younger sister                             |
+  

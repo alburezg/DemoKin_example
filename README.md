@@ -1,2 +1,6 @@
-# Kinship approaches in demography
-Scripts for Formal Demography Working Group demonstration of kinship things
+Kinship Approaches in Demography
+================
+Diego Alburez-Gutierrez
+Feb 2022
+
+
