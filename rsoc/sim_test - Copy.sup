@@ -1,0 +1,13 @@
+*Supervisory file for a stable population
+* 20220120
+marriage_queues 1
+bint 10
+segments 1
+marriage_eval distribution
+input_file init_new
+output_file output_pop
+*
+duration 1200
+include SWEfert2022
+include SWEmort2022
+ run

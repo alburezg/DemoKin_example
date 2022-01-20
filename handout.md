@@ -25,18 +25,7 @@ output:
 }
 </style>
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
-source("lexis.R")
-
-# Install pagages if needed
-library(DemoKin)
-library(tidyverse)
-library(knitr)
-library(ggrepel)
-library(latex2exp)
-```
 
 # Why kinship matters
 
@@ -51,7 +40,8 @@ Let's review the principle of demographic ergodicity:
 
 > A closed population with unchanging mortality and fertility rates has an implied (a) Intrinsic rate of natural increase $r$ and (2) age structure. 
 
-```{r}
+
+```r
 # Use Lexis matrices to show this
 # Animation?
 ```
@@ -62,20 +52,10 @@ Goodman et al [-@goodman_family_1974]: **Stable populations also have an intrins
 
 For example, this is the expected number of kin for an woman aged 50 ('Ego') in a female population that experiences the 2015 Swedish demographic rates ad-infinitum:
 
-```{r, echo=F}
-# An example using our package DemoKin, which will be explained later
 
-# library(DemoKin)
-swe50_2015_stable <- 
-  kins(
-    ego_age = 50
-    , year = 2015
-    , P = swe_surv
-    , asfr = swe_asfr
-    , stable = TRUE
-    )
-
-plot_diagram(swe50_2015_stable[["kins_total"]])
+```{=html}
+<div id="htmlwidget-577fb1c30d0b39939bb0" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-577fb1c30d0b39939bb0">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.006)\n  GM  --> AOM(oa: <br>0.214)\n  GM  ==> M(m: <br>0.675)\n  GM  --> AYM(ya: <br>0.38)\n  AOM  --> CAOM(coa: <br>0.376)\n  M   --> OS(os: <br>0.419)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.467)\n  AYM  --> CAYM(cya: <br>0.42)\n  OS   --> NOS(nos: <br>0.388)\n  E   ==> D(d: <br>0.903)\n  YS   --> NYS(nys: <br>0.408)\n  D   ==> GD(gd: <br>0.034)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 ## Living ancestors
@@ -106,15 +86,14 @@ M_1(a) \approx \frac{l_{\mu + a}}{l_{\mu}}.
 
 Eq. \@ref(eq:approx) states that the probability that a girl alive at age $a$ has a living mother is approximately equal to the probability that women in the population are alive $a$ years past the mean age at childbearing, conditional on them being alive at the mean age at childbearing.
 
-```{r}
+
+```r
 # Compare actual and approx?
 ```
 
 We can visualise this in a Lexis Diagram [@Keyfitz2005]:
 
-```{r, echo=F,message=FALSE,warning=FALSE}
-lexis1()
-```
+![](handout_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 To generalise to older generations, let us first define the age distribution of the women as $W(x) = e^{-rx}l(x)m(x)$, so that Eq. \@ref(eq:m1a) becomes:
 
@@ -139,9 +118,7 @@ M_3(a) = \int_{\alpha}^{\beta}{ M_2(x+a) W(x) \:dx};
 
 and so on.
 
-```{r}
 
-```
 
 ## Living descendants
 
@@ -183,7 +160,8 @@ Note that the $(a-x,c+x)$ subscript allows us to replace the assumption of demog
 1. One-sex vs two-sex populations
 1. Recursive vs matrix implementations
 
-```{r}
+
+```r
 # 
 ```
 
@@ -210,7 +188,8 @@ New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2
 
 Use the in-built functions in `Rsoc` to run a simple simulation from scratch. 
 
-```{r, eval=FALSE}
+
+```r
 # library(rsoc)
 
 folder <- paste0(getwd(), "/rsoc")
@@ -223,11 +202,10 @@ supfile <- "sim_test.sup"
 rsoc::run1simulationwithfile(folder, supfile, seed)
 ```
 
-```{r, include = FALSE, warning=FALSE, message=FALSE}
-system("rsoc/socsim rsoc/sim_test.sup 42")
-```
 
-```{r}
+
+
+```r
 "can't open  marriage file Hope that's OK
 : No such file or directory
 can't open  transition history file. Hope that's OK
@@ -370,11 +348,13 @@ Population Pyramid at the end of Segment 1  Month: 1801
 "
 ```
 
+```
+## [1] "can't open  marriage file Hope that's OK\n: No such file or directory\ncan't open  transition history file. Hope that's OK\n: No such file or directoryü®\n\n\n Socsim Version: STANDARD-UNENHANCED-VERSION\n\nopenning rsoc/sim_test.sup \nopenning rsoc/SWEfert2022 \nopenning rsoc/SWEmort2022 \noffset 4321379 line4321379\n\n\n Adjusting fertility rates for 10 month birth interval \nreading fertility rates for: group=1 mstat=1 parity=0\n+\nreading fertility rates for: group=1 mstat=4 parity=0\n+\nopening pop pyramid file rsoc/output_pop.pyr\nReading initial population file rsoc/init_new.opop\nNo initial marriage file to read\nNo initial transition history file to read\nStarting month is 601\nInitial size of pop 8000  (living: 8000)\nRates imply simulation will have 4321379 groups\nInitial population has max group id 4321379 \nSimulation will have 4321379 groups\n\n checking rates for sanity\n   ***NO MARRIAGE RATES for for  SINGLE male of ANY group\n\n   ***NO MARRIAGE RATES for for  SINGLE female of ANY group\n\n\n\n - - - - - - - - - - - - - - - - - - - - - -  - - - - - \n\nSegment NO:\t1 of 1 set to run with following macro options\nDuration: 1200\n\n-- I/O options --\nInput pop file name\trsoc/init_new.opop\nNo marriage file read\nTransition history file NOT read\nXtra variables NOT read\n\n-- Fertility options --\nSex Ratio(prop male births):\t 0.511200\nMinimum Birth Interval:\t10.000000 months\nFertility Multipler inheritance specified:no\nBirth rate factors specified:no\nBirth Targets Specified:no\nRandom_father disabled\n\n-- Nuptiality Options --\nmarriage_queues==1\nEndogamy/Exogamy: random\nmarriages evaluated by 'distribution' of age diff\nmean/sd of agediff for females of group:1 : 2.000000/3.000000\n\n-- Migration Options --\nTransition rate targets set:no\nchild group identity :  inherited from MOTHER\n\n  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||\n\n\nSimulating...\nNew events generated for all living persons\ncurrent month 601 stop month 1800 duration 1200\n--------month:   1000  PopLive:  13318  Brths:   7 Dths:   1 Mrgs:   0 Dvs:   0 Mq:6734 Fq:0 -------\n--------month:   1800  PopLive:  11865  Brths:   8 Dths:   9 Mrgs:   0 Dvs:   0 Mq:5931 Fq:0 -------\nsegment 1 complete current month: 1801\n\n\n Simulation Complete \nwriting population (.opop) ..\nwriting marriages (.omar)..\n\nrand_max: 32767total size of pop 22780\n\nliving size of pop 11865\n\n\n\n\nPopulation Pyramid at the end of Segment 1  Month: 1801  \n             All groups :Total Population: 11865\n---------------MALE--------------------|--------------FEMALE-------------------\n                                       |                                       \n                                     MM|FF                                     \n                                 MMMMMM|FFFFFF                                 \n                               MMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFF                               \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFF                               \n                               MMMMMMMM|FFFFFFFF                               \n   ------+---------+---------+---------+---------+---------+---------+------\n         15        10         5         0         5        10        15        \n\n\nPopulation Pyramid at the end of Segment 1  Month: 1801  \n             Group: 1  Total Population: 11865\n---------------MALE--------------------|--------------FEMALE-------------------\n                                       |                                       \n                                     MM|FF                                     \n                                 MMMMMM|FFFFFF                                 \n                               MMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFF                               \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFF                               \n                               MMMMMMMM|FFFFFFFF                               \n   ------+---------+---------+---------+---------+---------+---------+------\n         15        10         5         0         5        10        15        \n"
+```
+
 Analyze the output
 
-```{r}
 
-```
 
 # Applications
 
