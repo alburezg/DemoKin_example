@@ -25,18 +25,7 @@ output:
 }
 </style>
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
-source("lexis.R")
-
-# Install pagages if needed
-library(DemoKin)
-library(tidyverse)
-library(knitr)
-library(ggrepel)
-library(latex2exp)
-```
 
 # Why kinship matters
 
@@ -57,20 +46,10 @@ Goodman et al [-@goodman_family_1974]: **Stable (and non-stable) populations als
 
 For example, this is the expected number of kin for an woman aged 50 ('Ego') in a female population that experiences the 2015 Swedish demographic rates ad-infinitum:
 
-```{r, echo=F}
-# An example using our package DemoKin, which will be explained later
 
-# library(DemoKin)
-swe50_2015_stable <- 
-  kins(
-    ego_age = 50
-    , year = 2015
-    , P = swe_surv
-    , asfr = swe_asfr
-    , stable = TRUE
-    )
-
-plot_diagram(swe50_2015_stable[["kins_total"]])
+```{=html}
+<div id="htmlwidget-8b4b211b646a2a3886e6" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8b4b211b646a2a3886e6">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.006)\n  GM  --> AOM(oa: <br>0.214)\n  GM  ==> M(m: <br>0.675)\n  GM  --> AYM(ya: <br>0.38)\n  AOM  --> CAOM(coa: <br>0.376)\n  M   --> OS(os: <br>0.419)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.467)\n  AYM  --> CAYM(cya: <br>0.42)\n  OS   --> NOS(nos: <br>0.388)\n  E   ==> D(d: <br>0.903)\n  YS   --> NYS(nys: <br>0.408)\n  D   ==> GD(gd: <br>0.034)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 ## Assumptions and parameters
@@ -90,9 +69,7 @@ M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} e^{-rx}l(x)m(x) dx}.
 
 We can visualise this in a Lexis Diagram [@Keyfitz2005]:
 
-```{r, echo=F,message=FALSE,warning=FALSE}
-lexis1()
-```
+![](index_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 We can define $W(x)$ as the age distribution of the women of girls [@goodman_family_1974].
 
@@ -124,9 +101,7 @@ M_3(a) = \int_{\alpha}^{\beta}{ M_2(x+a) W(x) \:dx}.
 
 and so on.
 
-```{r}
 
-```
 
 ## Descendants
 
@@ -168,7 +143,8 @@ New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2
 
 **Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
 
-```{r, eval=FALSE}
+
+```r
 library(rsoc)
 folder <- getwd()
 seed <- 33
