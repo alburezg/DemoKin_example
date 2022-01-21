@@ -27,6 +27,8 @@ output:
 
 
 
+Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.
+
 # Why kinship matters
 
 - Socialisation, protection, and sustenance
@@ -50,13 +52,20 @@ Goodman et al [-@goodman_family_1974]: **Stable populations also have an intrins
 
 > A ﬁxed set of age-speciﬁc rates implies the probability that a girl aged *a* has a living mother and great-grandmother, as well as her expected number of daughters, sisters, aunts, nieces, and cousins. [@Keyfitz2005]
 
-For example, this is the expected number of kin for an woman aged 50 ('Ego') in a female population that experiences the 2015 Swedish demographic rates ad-infinitum:
+For example, this is the expected number of kin for an woman aged 80 ('Ego') in a female population that experiences the 1950 Swedish demographic rates ad-infinitum:
 
 
 ```{=html}
-<div id="htmlwidget-577fb1c30d0b39939bb0" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-577fb1c30d0b39939bb0">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.006)\n  GM  --> AOM(oa: <br>0.214)\n  GM  ==> M(m: <br>0.675)\n  GM  --> AYM(ya: <br>0.38)\n  AOM  --> CAOM(coa: <br>0.376)\n  M   --> OS(os: <br>0.419)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.467)\n  AYM  --> CAYM(cya: <br>0.42)\n  OS   --> NOS(nos: <br>0.388)\n  E   ==> D(d: <br>0.903)\n  YS   --> NYS(nys: <br>0.408)\n  D   ==> GD(gd: <br>0.034)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b1d255a401b9a88aeb12" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b1d255a401b9a88aeb12">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0.014)\n  AOM  --> CAOM(coa: <br>0.142)\n  M   --> OS(os: <br>0.088)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.358)\n  AYM  --> CAYM(cya: <br>0.384)\n  OS   --> NOS(nos: <br>0.49)\n  E   ==> D(d: <br>1.023)\n  YS   --> NYS(nys: <br>0.607)\n  D   ==> GD(gd: <br>1.191)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
+
+## Assumptions and parameters
+
+1. Stable vs non-stable populations
+1. One-sex vs two-sex populations
+1. Recursive vs matrix implementations
+1. Analytic vs microsimulation
 
 ## Living ancestors
 
@@ -64,7 +73,7 @@ The probability that a girl aged $a$ has a living mother in a stable population 
 
 
 \begin{equation}
-M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} e^{-rx}l(x)m(x) dx}.
+M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} e^{-rx}l(x)m(x) \:dx}
 (\#eq:m1a)
 \end{equation}
 
@@ -84,18 +93,27 @@ M_1(a) \approx \frac{l_{\mu + a}}{l_{\mu}}.
 (\#eq:approx)
 \end{equation}
 
+We can visualise this in a Lexis Diagram [@Keyfitz2005]:
+
+![](handout_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+
 Eq. \@ref(eq:approx) states that the probability that a girl alive at age $a$ has a living mother is approximately equal to the probability that women in the population are alive $a$ years past the mean age at childbearing, conditional on them being alive at the mean age at childbearing.
 
 
 ```r
-# Compare actual and approx?
+swe50_1950_stable[["kins_by_age_ego"]] %>%
+  select(x, m) %>% 
+  gather(kin, count, -x) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Probability that mother is alive") 
 ```
-
-We can visualise this in a Lexis Diagram [@Keyfitz2005]:
 
 ![](handout_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
-To generalise to older generations, let us first define the age distribution of the women as $W(x) = e^{-rx}l(x)m(x)$, so that Eq. \@ref(eq:m1a) becomes:
+To generalise to older generations, let us first define the age distribution of women as $W(x) = e^{-rx}l(x)m(x)$, so that Eq. \@ref(eq:m1a) becomes:
 
 \begin{equation}
 M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} W(x)  dx}.
@@ -119,6 +137,18 @@ M_3(a) = \int_{\alpha}^{\beta}{ M_2(x+a) W(x) \:dx};
 and so on.
 
 
+```r
+swe50_1950_stable[["kins_by_age_ego"]] %>%
+  select(x, `A. grandmother` = gm, `B. great-grandmother` = ggm) %>% 
+  gather(kin, count, -x) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving") +
+  facet_wrap(~kin)
+```
+
+![](handout_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 ## Living descendants
 
@@ -136,14 +166,65 @@ B_2(a) = \int_{\alpha}^{a}{m(x)\int_{\alpha}^{a-x}{l(y) m(y) \: dy }\:dx}.
 \label{eq:b2}
 \end{equation}
 
+
+```r
+swe50_1950_stable[["kins_by_age_ego"]] %>%
+  select(x, daughter = d, granddaughter = gd) %>% 
+  gather(kin, count, -x) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving") +
+  facet_wrap(~kin)
+```
+
+![](handout_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+## Other relatives
+
+The GKP recursive approach can get messy quickly. Consider the expected number of first cousins from the mother's older sisters' side:
+
+
+\begin{equation}
+C_1(a) = \int_{\alpha}^{\beta} {\left[ \int_{\alpha}^{\beta}{ \left\{ \int_{\alpha}^{y}{\left( \int_{\alpha}^{a+x+y-z}{l(w)m(w) \: dw} \right)} m(z) \: dz \right\}  } \: W(y) \: dy \right] \: W(x) \: dx},
+    \label{eq:cousin1}
+\end{equation}
+
+where $W(x)$ is the age distribution of the women:
+
+\begin{equation}
+W(x) = e^{-rx}l(x)m(x).
+    \label{wx}
+\end{equation}
+
+
+```r
+swe50_1950_stable[["kins_by_age_ego"]] %>%
+  select(x, `younger aunt` = cya, `older aunt` = coa) %>% 
+  gather(kin, count, -x) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving cousins through") +
+  facet_wrap(~kin)
+```
+
+![](handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
 ## Removing the stable assumption
 
 Demographic rates change constantly in the real world - populations are rarely stable. Each of the stable identities given above have a non-stable equivalent, but we won't cover these given time limitations. As an example, consider the non-stable equivalent of the GKP equation for the number of surviving children is. 
 
+First, remember the stable equation presented in Eq.\@ref(eq:b1):
+
+\begin{equation}
+M_1(a) = \int_{\alpha}^{a}{m(x) l(a-x) \: dx}.
+\end{equation}
+
 The expected number of surviving children for an average woman aged $a$ born in year $c$ in a non-stable population is:
 
 \begin{equation}
-B_1(a,c) \approx \sum_{x=\alpha}^{a}{F(x,c) l(a-x,c+x)}
+M_1(a,c) = \sum_{x=\alpha}^{a}{F(x,c) l(a-x,c+x)}
 \label{eq:b1_dic}
 \end{equation}
 
@@ -154,213 +235,163 @@ where
 
 Note that the $(a-x,c+x)$ subscript allows us to replace the assumption of demographic stability present in the original formulation of the GKP equations with empirical rates.
 
-## Implementation in R
-
-1. Stable vs non-stable populations
-1. One-sex vs two-sex populations
-1. Recursive vs matrix implementations
-
-
-```r
-# 
-```
 
 ## A Matrix Formulation
 
-A recursive approach can get messy quickly For example, the expected number of younger sisters surviving to ego's age $a$ is:
+New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2021;@caswell2021formal_two-sex].
+
+Let $\textbf{b}(x+1)$ be the population of Ego's granddaughters at time $(x+1)$ ($\textbf{b}_{0} = \textbf{0}$ because Ego has no granddaughters at birth), $\textbf{U}$ be a matrix with survival probabilities in the subdiagonal, $\textbf{F}$ be a matrix with fertility rates in the first row and zeros elsewhere, and $\textbf{a}$ be the population of surviving daughters at time $x$:
 
 \begin{equation}
-S^{young}(a) = \int_{\alpha}^{\beta}{ \int_{0}^{a}{ \left[ \frac{l(x+u)}{l(x)} \right] m(x+u) l(a-u)\: du } \: e^{-rx}l(x)m(x) \: dx}
-\label{eq:sis_young}
+\label{eq:matrix}
+    \underbrace{\textbf{b}(x+1)}_{\substack{\text{Population of}\\ \text{granddaughters}}} = \underbrace{\textbf{Ub}(x)}_{\text{Granddaughter survival}}  + \underbrace{\textbf{Fa}(x).}_{\substack{\text{Granddaughters}\\ \text{born from daughters}}}
 \end{equation}
-
-where $l(x+u)/l(x)$ is the probability that the mother survives $u$ years after ego's birth. 
-
-New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2021;@caswell2021formal_two-sex].
 
 # DemoKin: An R package to estimate kinship networks in stable and non-stable populations
 
 **Iván Williams, Diego Alburez-Gutierrez, and Xi Song**; https://github.com/IvanWilli/DemoKin
 
-# Rsoc: Demographic microsimulations in R made easy
+## Kin counts in stable populations
 
-**Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
-
-Use the in-built functions in `Rsoc` to run a simple simulation from scratch. 
+We can estimate this in a **stable** framework using data from 1995, assuming that all of Egos' relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
 
 
 ```r
-# library(rsoc)
-
-folder <- paste0(getwd(), "/rsoc")
-seed <- 33
-
-# name of the supplement-file, relative to the above folder:
-supfile <- "sim_test.sup" 
-
-# run1simulationwithfile starts a simulation with the specified sup-file
-rsoc::run1simulationwithfile(folder, supfile, seed)
+swe35_1950_stable <- 
+  kins(
+    ego_age = 100
+    , year = 1950
+    , P = swe_surv
+    , asfr = swe_asfr
+    , stable = TRUE
+    , alive = "yes"
+    )
 ```
 
-
+Let's visualize the distribution of relatives over ego's lifecourse:
 
 
 ```r
-"can't open  marriage file Hope that's OK
-: No such file or directory
-can't open  transition history file. Hope that's OK
-: No such file or directoryü®
+swe35_1950_stable[["kins_by_age_ego"]] %>%
+              gather(kin, count, -x) %>%
+              ggplot() +
+              geom_line(aes(x, count))  +
+              geom_vline(xintercept = 35, color=2)+
+              theme_bw() +
+              labs(x = "Ego's age") +
+              facet_wrap(~kin)
+```
+
+![](handout_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+Where each relative type is identified by a unique code:
 
 
- Socsim Version: STANDARD-UNENHANCED-VERSION
+|Code |Relative                                   |
+|:----|:------------------------------------------|
+|coa  |Cousins (through aunt older than mother)   |
+|cya  |Cousins (through aunt younger than mother) |
+|d    |Daughter                                   |
+|gd   |Grand-daughter                             |
+|ggm  |Great-grandmother                          |
+|gm   |Grandmother                                |
+|m    |Mother                                     |
+|nos  |Nieces through older sister                |
+|nys  |Nieces through younger sister              |
+|oa   |Aunt older than mother                     |
+|ya   |Aunt younger than mother                   |
+|os   |Older sister                               |
+|ys   |Younger sister                             |
 
-openning rsoc/sim_test.sup 
-openning rsoc/SWEfert2022 
-openning rsoc/SWEmort2022 
-offset 4321379 line4321379
-
-
- Adjusting fertility rates for 10 month birth interval 
-reading fertility rates for: group=1 mstat=1 parity=0
-+
-reading fertility rates for: group=1 mstat=4 parity=0
-+
-opening pop pyramid file rsoc/output_pop.pyr
-Reading initial population file rsoc/init_new.opop
-No initial marriage file to read
-No initial transition history file to read
-Starting month is 601
-Initial size of pop 8000  (living: 8000)
-Rates imply simulation will have 4321379 groups
-Initial population has max group id 4321379 
-Simulation will have 4321379 groups
-
- checking rates for sanity
-   ***NO MARRIAGE RATES for for  SINGLE male of ANY group
-
-   ***NO MARRIAGE RATES for for  SINGLE female of ANY group
+We can also visualize the age distribution of relatives when Ego is 35:
 
 
+```r
+swe35_1950_stable[["kins_by_age_kin"]] %>%
+              select(-x) %>% 
+              gather(kin, count, -x_kin) %>%
+              ggplot() +
+              geom_line(aes(x_kin, count))  +
+              geom_vline(xintercept = 35, color=2)+
+              labs(x = "Age of kin") +
+              theme_bw() +
+              facet_wrap(~kin)
+```
 
- - - - - - - - - - - - - - - - - - - - - - -  - - - - - 
-
-Segment NO:	1 of 1 set to run with following macro options
-Duration: 1200
-
--- I/O options --
-Input pop file name	rsoc/init_new.opop
-No marriage file read
-Transition history file NOT read
-Xtra variables NOT read
-
--- Fertility options --
-Sex Ratio(prop male births):	 0.511200
-Minimum Birth Interval:	10.000000 months
-Fertility Multipler inheritance specified:no
-Birth rate factors specified:no
-Birth Targets Specified:no
-Random_father disabled
-
--- Nuptiality Options --
-marriage_queues==1
-Endogamy/Exogamy: random
-marriages evaluated by 'distribution' of age diff
-mean/sd of agediff for females of group:1 : 2.000000/3.000000
-
--- Migration Options --
-Transition rate targets set:no
-child group identity :  inherited from MOTHER
-
-  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+![](handout_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 
-Simulating...
-New events generated for all living persons
-current month 601 stop month 1800 duration 1200
---------month:   1000  PopLive:  13318  Brths:   7 Dths:   1 Mrgs:   0 Dvs:   0 Mq:6734 Fq:0 -------
---------month:   1800  PopLive:  11865  Brths:   8 Dths:   9 Mrgs:   0 Dvs:   0 Mq:5931 Fq:0 -------
-segment 1 complete current month: 1801
+The function also includes data on the mean age of Ego's relatives at her actual age:
 
 
- Simulation Complete 
-writing population (.opop) ..
-writing marriages (.omar)..
-
-rand_max: 32767total size of pop 22780
-
-living size of pop 11865
+```r
+swe35_1950_stable[["kins_mean_age"]] %>% 
+  round(1) %>% 
+  sort() %>% 
+  t() %>% 
+  kable()
+```
 
 
 
+|   gd|  nys|    d|  nos|  cya|   ys|  coa|   ya| ggm|  gm|   m|  oa|  os|
+|----:|----:|----:|----:|----:|----:|----:|----:|---:|---:|---:|---:|---:|
+| 42.5| 62.2| 69.7| 73.3| 78.1| 84.4| 85.9| 95.1| 100| 100| 100| 100| 100|
 
-Population Pyramid at the end of Segment 1  Month: 1801  
-             All groups :Total Population: 11865
----------------MALE--------------------|--------------FEMALE-------------------
-                                       |                                       
-                                     MM|FF                                     
-                                 MMMMMM|FFFFFF                                 
-                               MMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
-                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
-                           MMMMMMMMMMMM|FFFFFFFFFF                             
-                           MMMMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFF                               
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                               MMMMMMMM|FFFFFFFFFF                             
-                               MMMMMMMM|FFFFFFFF                               
-                               MMMMMMMM|FFFFFFFF                               
-   ------+---------+---------+---------+---------+---------+---------+------
-         15        10         5         0         5        10        15        
+We can visualize the estimated kin counts for Ego at age 35 in a stable population using a network diagram:
 
 
-Population Pyramid at the end of Segment 1  Month: 1801  
-             Group: 1  Total Population: 11865
----------------MALE--------------------|--------------FEMALE-------------------
-                                       |                                       
-                                     MM|FF                                     
-                                 MMMMMM|FFFFFF                                 
-                               MMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
-                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
-                           MMMMMMMMMMMM|FFFFFFFFFF                             
-                           MMMMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFF                               
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                             MMMMMMMMMM|FFFFFFFFFF                             
-                               MMMMMMMM|FFFFFFFFFF                             
-                               MMMMMMMM|FFFFFFFF                               
-                               MMMMMMMM|FFFFFFFF                               
-   ------+---------+---------+---------+---------+---------+---------+------
-         15        10         5         0         5        10        15        
-"
+```r
+plot_diagram(swe35_1950_stable[["kins_total"]])
+```
+
+```{=html}
+<div id="htmlwidget-7790cd30170044691286" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7790cd30170044691286">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0)\n  AOM  --> CAOM(coa: <br>0.007)\n  M   --> OS(os: <br>0)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.037)\n  AYM  --> CAYM(cya: <br>0.088)\n  OS   --> NOS(nos: <br>0.248)\n  E   ==> D(d: <br>0.697)\n  YS   --> NYS(nys: <br>0.498)\n  D   ==> GD(gd: <br>1.156)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+```
+
+## Experience of kin death
+
+Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see how many relatives Ego loss during her life (output `kins_death_by_age_ego`), in a stable framework:
+
+
+```r
+swe35_1950_nonstable_death <- 
+    kins(
+    ego_age = 35
+    , year = 1950
+    , P = swe_surv
+    , asfr = swe_asfr
+    , stable = TRUE
+    , alive = "no"
+    )
+
+swe35_1950_nonstable_death[["kins_cum_death_by_age_ego"]] %>%
+  gather(kin, count, -x,) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  geom_vline(xintercept = 35, color=2)+
+  theme_bw() +
+  facet_wrap(~kin,scales="free")
+```
+
+![](handout_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+Given some portion of each relative was dead (remember we are talking about population measures), we can ask what was the mean age at lost for each kin:
+
+
+```r
+swe35_1950_nonstable_death[["lost_mean_age"]] %>% round(2)
 ```
 
 ```
-## [1] "can't open  marriage file Hope that's OK\n: No such file or directory\ncan't open  transition history file. Hope that's OK\n: No such file or directoryü®\n\n\n Socsim Version: STANDARD-UNENHANCED-VERSION\n\nopenning rsoc/sim_test.sup \nopenning rsoc/SWEfert2022 \nopenning rsoc/SWEmort2022 \noffset 4321379 line4321379\n\n\n Adjusting fertility rates for 10 month birth interval \nreading fertility rates for: group=1 mstat=1 parity=0\n+\nreading fertility rates for: group=1 mstat=4 parity=0\n+\nopening pop pyramid file rsoc/output_pop.pyr\nReading initial population file rsoc/init_new.opop\nNo initial marriage file to read\nNo initial transition history file to read\nStarting month is 601\nInitial size of pop 8000  (living: 8000)\nRates imply simulation will have 4321379 groups\nInitial population has max group id 4321379 \nSimulation will have 4321379 groups\n\n checking rates for sanity\n   ***NO MARRIAGE RATES for for  SINGLE male of ANY group\n\n   ***NO MARRIAGE RATES for for  SINGLE female of ANY group\n\n\n\n - - - - - - - - - - - - - - - - - - - - - -  - - - - - \n\nSegment NO:\t1 of 1 set to run with following macro options\nDuration: 1200\n\n-- I/O options --\nInput pop file name\trsoc/init_new.opop\nNo marriage file read\nTransition history file NOT read\nXtra variables NOT read\n\n-- Fertility options --\nSex Ratio(prop male births):\t 0.511200\nMinimum Birth Interval:\t10.000000 months\nFertility Multipler inheritance specified:no\nBirth rate factors specified:no\nBirth Targets Specified:no\nRandom_father disabled\n\n-- Nuptiality Options --\nmarriage_queues==1\nEndogamy/Exogamy: random\nmarriages evaluated by 'distribution' of age diff\nmean/sd of agediff for females of group:1 : 2.000000/3.000000\n\n-- Migration Options --\nTransition rate targets set:no\nchild group identity :  inherited from MOTHER\n\n  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||\n\n\nSimulating...\nNew events generated for all living persons\ncurrent month 601 stop month 1800 duration 1200\n--------month:   1000  PopLive:  13318  Brths:   7 Dths:   1 Mrgs:   0 Dvs:   0 Mq:6734 Fq:0 -------\n--------month:   1800  PopLive:  11865  Brths:   8 Dths:   9 Mrgs:   0 Dvs:   0 Mq:5931 Fq:0 -------\nsegment 1 complete current month: 1801\n\n\n Simulation Complete \nwriting population (.opop) ..\nwriting marriages (.omar)..\n\nrand_max: 32767total size of pop 22780\n\nliving size of pop 11865\n\n\n\n\nPopulation Pyramid at the end of Segment 1  Month: 1801  \n             All groups :Total Population: 11865\n---------------MALE--------------------|--------------FEMALE-------------------\n                                       |                                       \n                                     MM|FF                                     \n                                 MMMMMM|FFFFFF                                 \n                               MMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFF                               \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFF                               \n                               MMMMMMMM|FFFFFFFF                               \n   ------+---------+---------+---------+---------+---------+---------+------\n         15        10         5         0         5        10        15        \n\n\nPopulation Pyramid at the end of Segment 1  Month: 1801  \n             Group: 1  Total Population: 11865\n---------------MALE--------------------|--------------FEMALE-------------------\n                                       |                                       \n                                     MM|FF                                     \n                                 MMMMMM|FFFFFF                                 \n                               MMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFFFF                           \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                           MMMMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFF                               \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                             MMMMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFFFF                             \n                               MMMMMMMM|FFFFFFFF                               \n                               MMMMMMMM|FFFFFFFF                               \n   ------+---------+---------+---------+---------+---------+---------+------\n         15        10         5         0         5        10        15        \n"
+##   coa   cya     d    gd   ggm    gm     m   nos   nys    oa    os    ya    ys 
+## 23.29 21.97 28.83 34.73  9.39 20.04 25.19 25.24 30.74 24.88 22.93 24.80 20.50
 ```
 
-Analyze the output
+# Example: Women's experience of child death [@alburez-gutierrez_womens_2021]
 
-
-
-# Applications
-
-## Women's experience of child death
-
-We [@alburez-gutierrez_womens_2021] showed that the number of children ever born to a woman aged $a$ born in cohort $c$ standing before us will be equal to the number of children who are currently alive plus the children who died before the woman reached age $a$:
+In a non-stable population, the number of children ever born to a woman aged $a$ born in cohort $c$ standing before us will be equal to the number of children who are currently alive plus the children who died before the woman reached age $a$:
 
 
 \begin{equation}
@@ -373,35 +404,202 @@ where
 - $_1F_{x}(c,n)$ are single-year age-specific fertility rates for cohort $c$ and country $n$, at age $x$. The lower age boundary in this and all models is 15, representing the start of a woman's reproductive life. 
 - $l_{a-x}(c+x,n)$ is the survival probability until age $(a-x)$ for the cohort born in year $(c+x)$ in country $n$. It is the probability that the children of a woman who gave birth at age $x$ will survive until the woman potentially reaches age $a$.   
 
-Explore estimates using this online application: https://diego-alburez.shinyapps.io/child_death_demography/
+**Explore results using this online application: https://diego-alburez.shinyapps.io/child_death_demography/**
 
-## Sandwich Generation
+# Studies with a strong kinship component
 
-Given constant age-specific schedules of fertility and mortality rates [@alburezgutierrez_sandwich_2021], we can express the probability of maternal sandwichness at age $a$, $S(a)$, as:
-
-\begin{equation}
-S(a) = \underbrace{\left(1 - \prod_{x=1}^{\kappa} [1 - m_{a-x})] \right)}_{\substack{\text{fertility risk in the}\\ \text{$\kappa$ years preceding age \emph{a}}}} \times \underbrace{M_1(a)}_{\substack{\text{Prob. that mother of ego}\\ \text{is alive when ego is \emph{a} years old}}} \times  \underbrace{\left(1-  \frac{M_1(a+\tau)}{M_1(a)}\right)}_{\substack{\text{Prob. that mother of ego}\\ \text{would die within $\tau$ years}}}    
-\label{eq:sand}
-\end{equation}
-
-
-where $m_{a-x}$ is the fertility of women at age $a-x$ and $M_1(a)$ is the probability of having a living mother at age $a$ in a stable population. 
-These estimates refer to an average woman in a female population, ignoring the role of offspring mortality.
-
-
-# Other resources and studies
-
-- Mortality shocks on kinship structure [@zagheni_impact_2011]
-- Mortality multiplier [@verdery_tracking_2020]
-- Kinship transitions: [Murphy]@murphy_long-term_2011;@verdery_links_2015] 
-- Bereavement: [@smith-greenaway_global_2021]
-- Unemployment in family networks [@song2021role]
-- Kinship and historical memory: [@alburez-gutierrez_demographic_2021]
-- Kin availability and family structure: [@wachter_kinship_1997] 
-- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019]
-- Kinlesness [@verdery2017projections]
+- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
+- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
+- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
+- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
+- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
+- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
 <!-- - Inheritance of demographic behaviour: Kolk  -->
 <!-- - Generational overlap:  -->
 
+# Rsoc: Demographic microsimulations in R made easy (bonus)
+
+**Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
+
+Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  ![SOCSIM OVERSIMPLIFIED](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf)). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
+
+
+```r
+cat(readLines("rsoc/sim_test.sup"), sep = "\n")
+```
+
+```
+## *Supervisory file for a stable population
+## * 20220120
+## marriage_queues 1
+## bint 10
+## segments 1
+## marriage_eval distribution
+## input_file init_new
+## output_file output_pop
+## *
+## duration 2400
+## include SWEfert1950
+## include SWEmort1950
+##  run
+```
+
+Let's run the simulation using `rsoc`:
+
+
+```r
+# library(rsoc)
+
+folder <- "rsoc"
+seed <- "42"
+
+# name of the supplement-file, relative to the above folder:
+supfile <- "sim_test.sup" 
+
+# run1simulationwithfile starts a simulation with the specified sup-file
+rsoc::run1simulationwithfile(folder, supfile, seed)
+```
+
+```
+## [1] "Start run1simulationwithfile"
+## [1] "rsoc"
+## [1] "42"
+## Start Socsim
+## start socsim main 
+## 
+## ratefile: sim_test.sup
+## 
+## Socsim Version: STANDARD-UNENHANCED-VERSION
+## initialize_segment_vars
+## initialize_segment_vars done
+## loading -.sup-file: sim_test.sup
+## ------------7
+```
+
+```
+## Warning in startSocsimWithFile(supfile, seed): can't openmarriage file Hope
+## that's OK
+```
+
+```
+## Warning in startSocsimWithFile(supfile, seed): can't open transition history
+## file. Hope that's OK
+```
+
+```
+## 
+##  output file names:
+##  init_new.opop|init_new.omar|init_new.opox|output_pop.pyr|output_pop.stat|init_new.otx|
+## fix pop pointers..
+## Starting month is 601
+## Initial size of pop 8000  (living: 8000)
+## New events generated for all living persons
+## ------------b1
+## 
+## Socsim Main Done
+## Socsim Done.inf
+## [1] "C:/cloud2/_static/workshops, roundtable sessions/20220101_kinship_formal_demography_wg/kinship_formal_demo"
+```
+
+```
+## [1] 1
+```
+
+Now, let's replicate one of the measures we obtained with the formal model: the probability that an average member of the population has a living mother. 
+
+First, we read the SOCSIM output:
+
+
+```r
+# Read simulation output population
+opop <- read.table(file="rsoc/output_pop.opop", header=F, as.is=T)  
+  
+## assign names to columns
+names(opop)<-c("pid","fem","group",
+                 "nev","dob","mom","pop","nesibm","nesibp",
+                 "lborn","marid","mstat","dod","fmult")
+  
+opop <- 
+  opop %>% 
+  # Transform to years
+  mutate(
+    birth_year = dob/12
+    , death_year = dod/12
+  ) %>% 
+  select(pid, mom, pop, fem, birth_year, death_year) %>% 
+  # fem = 1 for women!
+  # Remove founder generation (who have no mother)
+  # People can still have no dads but that's fine because
+  # Children of  unmarried couples get a 0 as id for their 
+  # father by default.
+  filter(!is.na(mom))
+  
+head(opop)
+```
+
+```
+##   pid mom pop fem birth_year death_year
+## 1   1   0   0   1   15.25000   98.91667
+## 2   2   0   0   0   19.08333  104.25000
+## 3   3   0   0   1   43.83333  136.00000
+## 4   4   0   0   0   41.08333  111.33333
+## 5   5   0   0   1   11.41667   86.75000
+## 6   6   0   0   0   11.16667   84.58333
+```
+
+Now, we estimate the probability of having a living mother from the Socsim microdata:
+
+
+```r
+# Estimates from SOCSIM
+m1_soc <- 
+left_join(
+  opop %>% 
+    filter(mom != 0) %>% 
+    filter(birth_year >= 50) %>% 
+    select(ego = pid, mom, ego_dob = birth_year)
+  , opop %>% 
+    select(mom = pid, mom_dod = death_year)
+) %>% 
+  mutate(ego_age_mom_death = mom_dod - ego_dob) %>% 
+  filter(ego_age_mom_death > 0) %>% 
+  count(age = ego_age_mom_death) %>% 
+  arrange(age) %>% 
+  mutate(count = 1 - cumsum(n)/sum(n)) %>% 
+  select(age, count) %>% 
+  mutate(source = "socsim")
+
+m1_soc %>% 
+  ggplot(aes(x = age, y = count, colour = source)) +
+  geom_line() +
+  labs(x = "Ego's age", y = "Probability that mother is alive") +
+  theme_bw()
+```
+
+![](handout_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+
+How does it compare with the model-derived values obtained from `DemoKin` above?
+
+
+```r
+# Get estimates from model
+m1_mod <- 
+  swe50_1950_stable[["kins_by_age_ego"]] %>%
+  select(x, m) %>% 
+  gather(kin, count, -x) %>% 
+  select(age = x, count) %>% 
+  mutate(source = "model")
+
+
+bind_rows(m1_soc, m1_mod) %>% 
+  ggplot(aes(x = age, y = count, colour = source)) +
+  geom_line() +
+  labs(x = "Ego's age", y = "Probability that mother is alive") +
+  theme_bw()
+```
+
+![](handout_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+
+They almost match entirely. Maybe if the simulation was a bit larger, we would get a better fit...
 
 ## References

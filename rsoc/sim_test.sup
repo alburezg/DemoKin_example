@@ -7,7 +7,7 @@ marriage_eval distribution
 input_file init_new
 output_file output_pop
 *
-duration 1000
-include SWEfert2022
-include SWEmort2022
+duration 2400
+include SWEfert1950
+include SWEmort1950
  run

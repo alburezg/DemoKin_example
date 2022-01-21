@@ -1,0 +1,108 @@
+
+
+Population Pyramid at the start of simulation Month: 601   
+             All groups :Total Population: 8000
+---------------MALE--------------------|--------------FEMALE-------------------
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                               MMMMMMMM|FFFFFFFF                               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+                 MMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+                 MMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+                   mmMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFffff                   
+   ------+---------+---------+---------+---------+---------+---------+------
+         15        10         5         0         5        10        15        
+
+
+Population Pyramid at the start of simulation Month: 601   
+             Group: 1  Total Population: 8000
+---------------MALE--------------------|--------------FEMALE-------------------
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                               MMMMMMMM|FFFFFFFF                               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+                 MMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+                 MMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFFFF               
+               MMMMMMMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFFFFFFF                 
+                   mmMMMMMMMMMMMMMMMMMM|FFFFFFFFFFFFFFFFffff                   
+   ------+---------+---------+---------+---------+---------+---------+------
+         15        10         5         0         5        10        15        
+
+
+Population Pyramid at the end of Segment 1  Month: 3001  
+             All groups :Total Population: 21430
+---------------MALE--------------------|--------------FEMALE-------------------
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                     MM|FF                                     
+                                   MMMM|FFFFFF                                 
+                                 MMMMMM|FFFFFF                                 
+                               MMMMMMMM|FFFFFFFF                               
+                             MMMMMMMMMM|FFFFFFFFFF                             
+                             MMMMMMMMMM|FFFFFFFFFF                             
+                           MMMMMMMMMMMM|FFFFFFFFFF                             
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFF                           
+                         mmMMMMMMMMMMMM|FFFFFFFFFFff                           
+   ------+---------+---------+---------+---------+---------+---------+------
+         15        10         5         0         5        10        15        
+
+
+Population Pyramid at the end of Segment 1  Month: 3001  
+             Group: 1  Total Population: 21430
+---------------MALE--------------------|--------------FEMALE-------------------
+                                       |                                       
+                                       |                                       
+                                       |                                       
+                                     MM|FF                                     
+                                   MMMM|FFFFFF                                 
+                                 MMMMMM|FFFFFF                                 
+                               MMMMMMMM|FFFFFFFF                               
+                             MMMMMMMMMM|FFFFFFFFFF                             
+                             MMMMMMMMMM|FFFFFFFFFF                             
+                           MMMMMMMMMMMM|FFFFFFFFFF                             
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFF                           
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFF                           
+                           MMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFFFF                         
+                         MMMMMMMMMMMMMM|FFFFFFFFFFFF                           
+                         mmMMMMMMMMMMMM|FFFFFFFFFFff                           
+   ------+---------+---------+---------+---------+---------+---------+------
+         15        10         5         0         5        10        15        
