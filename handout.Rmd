@@ -213,8 +213,9 @@ Use the in-built functions in `Rsoc` to run a simple simulation from scratch.
 ```{r, eval=FALSE}
 # library(rsoc)
 
-folder <- paste0(getwd(), "/rsoc")
-seed <- 33
+# folder <- paste0(getwd(), "/rsoc")
+folder <- "rsoc"
+seed <- "42"
 
 # name of the supplement-file, relative to the above folder:
 supfile <- "sim_test.sup" 
@@ -224,7 +225,8 @@ rsoc::run1simulationwithfile(folder, supfile, seed)
 ```
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
-system("rsoc/socsim rsoc/sim_test.sup 42")
+# Alternative, if rsoc is acting out
+# system("rsoc/socsim rsoc/sim_test.sup 42")
 ```
 
 ```{r}

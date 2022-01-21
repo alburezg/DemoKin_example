@@ -4,10 +4,10 @@ marriage_queues 1
 bint 10
 segments 1
 marriage_eval distribution
-input_file rsoc/init_new
-output_file rsoc/output_pop
+input_file init_new
+output_file output_pop
 *
 duration 1000
-include rsoc/SWEfert2022
-include rsoc/SWEmort2022
+include SWEfert2022
+include SWEmort2022
  run
