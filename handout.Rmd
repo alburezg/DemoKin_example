@@ -407,7 +407,7 @@ where
 
 **Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
 
-Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  ![SOCSIM OVERSIMPLIFIED](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf)). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
+Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  [SOCSIM oversimplified](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf) document). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
 
 ```{r, eval=T}
 cat(readLines("rsoc/sim_test.sup"), sep = "\n")
@@ -508,6 +508,74 @@ bind_rows(m1_soc, m1_mod) %>%
   theme_bw()
 ```
 
-They almost match entirely. Maybe if the simulation was a bit larger, we would get a better fit...
+They almost match entirely. Maybe if the simulation was a bit larger or if we ran more simulations, we would get a better fit?
+
+Try running 5 simulations
+
+```{r}
+
+run_random_simulation <- function(seed){
+
+  seed <- as.character(seed)
+  # seed <- as.character(sample(1:1000, 1))
+
+  # Run simulations with random seed
+  rsoc::run1simulationwithfile(
+    folder = "rsoc"
+      , supfile = "sim_test.sup" 
+      , seed = seed
+    )
+  
+# read output
+  # Read simulation output population
+  opop <- read.table(file="rsoc/output_pop.opop", header=F, as.is=T)  
+  
+  ## assign names to columns
+  names(opop)<-c("pid","fem","group",
+                 "nev","dob","mom","pop","nesibm","nesibp",
+                 "lborn","marid","mstat","dod","fmult")
+  
+  opop <- 
+    opop %>% 
+    # Transform to years
+    mutate(
+      birth_year = dob/12
+      , death_year = dod/12
+    ) %>% 
+    select(pid, mom, pop, fem, birth_year, death_year) %>% 
+    filter(!is.na(mom))
+
+  m1_soc <- 
+    left_join(
+      opop %>% 
+        filter(mom != 0) %>% 
+        filter(birth_year >= 50) %>% 
+        select(ego = pid, mom, ego_dob = birth_year)
+      , opop %>% 
+        select(mom = pid, mom_dod = death_year)
+    ) %>% 
+    mutate(ego_age_mom_death = mom_dod - ego_dob) %>% 
+    filter(ego_age_mom_death > 0) %>% 
+    count(age = ego_age_mom_death) %>% 
+    arrange(age) %>% 
+    mutate(count = 1 - cumsum(n)/sum(n)) %>% 
+    select(age, count) %>% 
+    mutate(source = "socsim") %>% 
+    mutate(seed = seed)
+  
+  m1_soc
+}
+
+m1_soc_sims <- 
+  lapply(sample(1:1000, 5), run_random_simulation) %>% 
+  bind_rows()
+
+m1_soc_sims %>% 
+  ggplot(aes(x = age, y = count, colour = seed)) +
+  geom_line() +
+  labs(x = "Ego's age", y = "Probability that mother is alive") +
+  theme_bw()
+
+```
 
 ## References
