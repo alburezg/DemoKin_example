@@ -3,7 +3,7 @@ initialize_segment_vars
 open: 0, load rate file: |sim_test.sup
 
 opening sim_test.sup 
-starting with line 12 at 0, seekset= 0 
+starting with line 0 at 0, seekset= 0 
 @FILE: sim_test.sup LINE: * 20220120
  
 @FILE: sim_test.sup LINE: marriage_queues 1
@@ -23,7 +23,7 @@ marriage_eval : 2
 
 @FILE: sim_test.sup LINE: input_file init_new
  
-I am here at load.cpp-k_input_file. |init_new.opop
+I am here at load.cpp-k_input_file. |
 I am here at load.cpp-k_input_file. |
 I am here at load.cpp-k_input_file. |init_new
 @FILE: sim_test.sup LINE: output_file output_pop
@@ -38,7 +38,7 @@ duration: 2400
 loading SWEfert1950 ... open: 0, load rate file: |SWEfert1950
 
 opening SWEfert1950 
-starting with line 12 at 0, seekset= 0 
+starting with line 0 at 0, seekset= 0 
 @FILE: SWEfert1950 LINE: * Mon Dec 20 14:21:53 2010
  
 @FILE: SWEfert1950 LINE: birth 1 F married 0
@@ -453,7 +453,7 @@ done loading SWEfert1950
 loading SWEmort1950 ... open: 0, load rate file: |SWEmort1950
 
 opening SWEmort1950 
-starting with line 12 at 0, seekset= 0 
+starting with line 0 at 0, seekset= 0 
 @FILE: SWEmort1950 LINE: * Mon Dec 20 14:21:08 2010
  
 @FILE: SWEmort1950 LINE: death 1 M married
@@ -2151,19 +2151,19 @@ child group identity :  inherited from MOTHER
   ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
 
 --write popu pyra
-Simmonth:  800 PopLive: 11420 Brths:  16 Dths:   3 Mrgs:  0 Dvs:  0 Mq: 5707 Fq:0 ti1: 0.3 ti2: 0.001000 0.0307
-month: 1000 PopLive: 14223 Brths:  24 Dths:   8 Mrgs:  0 Dvs:  0 Mq: 7101 Fq:0 ti1: 0.5 ti2: 0.002000 0.0397
-month: 1200 PopLive: 15391 Brths:  26 Dths:  13 Mrgs:  0 Dvs:  0 Mq: 7664 Fq:0 ti1: 0.8 ti2: 0.012000 0.2043
-month: 1400 PopLive: 16150 Brths:  14 Dths:  17 Mrgs:  0 Dvs:  0 Mq: 8069 Fq:0 ti1: 1.2 ti2: 0.009000 0.1382
-month: 1600 PopLive: 16826 Brths:  13 Dths:  20 Mrgs:  0 Dvs:  0 Mq: 8376 Fq:0 ti1: 1.6 ti2: 0.012000 0.1710
-month: 1800 PopLive: 17663 Brths:  24 Dths:  26 Mrgs:  0 Dvs:  0 Mq: 8850 Fq:0 ti1: 2.1 ti2: 0.015000 0.1915
-month: 2000 PopLive: 18274 Brths:  10 Dths:  24 Mrgs:  0 Dvs:  0 Mq: 9164 Fq:0 ti1: 2.6 ti2: 0.014000 0.1667
-month: 2200 PopLive: 18965 Brths:  32 Dths:  15 Mrgs:  0 Dvs:  0 Mq: 9503 Fq:0 ti1: 3.2 ti2: 0.013000 0.1440
-month: 2400 PopLive: 19478 Brths:  30 Dths:  21 Mrgs:  0 Dvs:  0 Mq: 9795 Fq:0 ti1: 3.7 ti2: 0.013000 0.1355
-month: 2600 PopLive: 20104 Brths:  25 Dths:  30 Mrgs:  0 Dvs:  0 Mq:10139 Fq:0 ti1: 4.3 ti2: 0.022000 0.2140
-month: 2800 PopLive: 20728 Brths:  19 Dths:  21 Mrgs:  0 Dvs:  0 Mq:10434 Fq:0 ti1: 5.1 ti2: 0.021000 0.1929
-.028000 0.2572
-month: 3000 PopLive: 21430 Brths:  22 Dths:  20 Mrgs:  0 Dvs:  0 Mq:10786 Fq:0 ti1: 9.6 ti2: 0.022000 0.1891
+Simulating...
+|m0|month:  800 PopLive: 11420 Brths:  16 Dths:   3 Mrgs:  0 Dvs:  0 Mq: 5707 Fq:0 ti1: 0.2 ti2: 0.001000 0.0307
+month: 1000 PopLive: 14223 Brths:  24 Dths:   8 Mrgs:  0 Dvs:  0 Mq: 7101 Fq:0 ti1: 0.3 ti2: 0.004000 0.0793
+month: 1200 PopLive: 15391 Brths:  26 Dths:  13 Mrgs:  0 Dvs:  0 Mq: 7664 Fq:0 ti1: 0.6 ti2: 0.008000 0.1362
+month: 1400 PopLive: 16150 Brths:  14 Dths:  17 Mrgs:  0 Dvs:  0 Mq: 8069 Fq:0 ti1: 0.8 ti2: 0.010000 0.1536
+month: 1600 PopLive: 16826 Brths:  13 Dths:  20 Mrgs:  0 Dvs:  0 Mq: 8376 Fq:0 ti1: 1.1 ti2: 0.006000 0.0855
+month: 1800 PopLive: 17663 Brths:  24 Dths:  26 Mrgs:  0 Dvs:  0 Mq: 8850 Fq:0 ti1: 1.4 ti2: 0.010000 0.1277
+month: 2000 PopLive: 18274 Brths:  10 Dths:  24 Mrgs:  0 Dvs:  0 Mq: 9164 Fq:0 ti1: 1.7 ti2: 0.008000 0.0953
+month: 2200 PopLive: 18965 Brths:  32 Dths:  15 Mrgs:  0 Dvs:  0 Mq: 9503 Fq:0 ti1: 2.1 ti2: 0.008000 0.0886
+month: 2400 PopLive: 19478 Brths:  30 Dths:  21 Mrgs:  0 Dvs:  0 Mq: 9795 Fq:0 ti1: 2.4 ti2: 0.007000 0.0730
+month: 2600 PopLive: 20104 Brths:  25 Dths:  30 Mrgs:  0 Dvs:  0 Mq:10139 Fq:0 ti1: 2.8 ti2: 0.008000 0.0778
+month: 2800 PopLive: 20728 Brths:  19 Dths:  21 Mrgs:  0 Dvs:  0 Mq:10434 Fq:0 ti1: 3.2 ti2: 0.015000 0.1378
+month: 3000 PopLive: 21430 Brths:  22 Dths:  20 Mrgs:  0 Dvs:  0 Mq:10786 Fq:0 ti1: 3.7 ti2: 0.014000 0.1203
 
 segment 1 complete current month: 3001
  grogro 
@@ -2178,7 +2178,7 @@ agga curr_segment 2
 agga read_xtra_file! 0 
 agga read_xtra_file! 0 
 males on queue
-person-years on queue: 18609773
+person-years on queue: 1705675
 females on queue
 person-years on queue: 0
 ageDiff	targetProp 	observedProp	E(mars)	O(mars)	excess	O/E	score

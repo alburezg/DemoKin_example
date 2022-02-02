@@ -1,9 +1,5 @@
 ---
 title: "Kinship Approaches in Demography or The Elementary Structures of Kinship"
-author: |
-   | Diego Alburez-Gutierrez,
-   | Lab of Digital and Computational Demography,
-   | Max Planck Institute for Demographic Research
 date: "Formal Demography Working Group - Feb 2022"
 header-includes:
   - \usepackage{amsmath}
@@ -25,30 +21,144 @@ output:
 }
 </style>
 
+<!-- author: | -->
+<!--    | Diego Alburez-Gutierrez, -->
+<!--    | Lab of Digital and Computational Demography, -->
+<!--    | Max Planck Institute for Demographic Research -->
+
+
 
 
 Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.
 
-# Why kinship matters
+# What is kinship demography?
+
+Kinship is relevant for:
 
 - Socialisation, protection, and sustenance
 - Inter-generational solidarity: exchanges and bequests
 - Social structure and identity
 - Early-life conditions $\rightarrow$ later-life outcomes
 
-# The Goodman-Keyfitz-Pullum (GKP) equations
+## Studies with a strong kinship component
+
+- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
+- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
+- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
+- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
+- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
+- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
+<!-- - Inheritance of demographic behaviour: Kolk  -->
+<!-- - Generational overlap:  -->
+
+# Demographic kinship structures
+
+## Implied demographic characteristics
 
 Let's review the principle of demographic ergodicity:
 
 > A closed population with unchanging mortality and fertility rates has an implied (a) Intrinsic rate of natural increase $r$ and (2) age structure. 
 
+According to Wachter [-@wachter_essential_2014], the proportion of the population aged $x$ to $x+n$ in a stationary population is:
+
+\begin{equation}
+  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}
+(\#eq:ageStat)
+\end{equation}
+
+where:
+
+
+- $_{n}K_{x}$ is the size of the population aged $x$ to $x+n$
+- $b$ is the Crude Birth Rate
+- $_{n}L_{x}$ are person-years lived, and
+- $l_{0}$ is the radix
+
 
 ```r
-# Use Lexis matrices to show this
-# Animation?
+# Swedish life tables:
+# https://www.mortality.org/hmd/SWE/STATS/bltcoh_5x10.txt
+
+lt <- 
+  read.table("fltper_1x10.txt", header = T, skip = 2) %>% 
+  # Pick an arbitrary year
+  filter(Year == "1900-1909") %>% 
+  select(Age, lx, Lx) 
+
+  # Crude birh rate from HFD
+  # https://www.humanfertility.org/cgi-bin/country.php?country=SWE&tab=si
+  
+CBR <- read.table("SWEcbrRR.txt", header = T, skip = 2)
+
+# Function to get implied age structure in stationary population
+
+get_ageg_size <- function(age_keep, ...){
+
+  l0 <- lt$lx[1]
+  
+  nLx <- 
+    lt %>% 
+    filter(Age == age_keep) %>% 
+    pull(Lx)
+  
+  
+b <- CBR %>% 
+    filter(Year == "1905") %>% 
+    pull(CBR)
+  
+  out <- b * (nLx / l0)
+  names(out) <- age_keep
+  
+  out
+}
+
+
+ageg_size <- 
+  lapply(lt$Age, get_ageg_size) %>% 
+  unlist() 
+
+# Get proportions
+
+ageg_prop <- ageg_size / sum(ageg_size)
+
+ageg_prop %>% 
+  data.frame %>% 
+  rownames_to_column("Age") %>% 
+  mutate(Age = as.numeric(Age)) %>% 
+  ggplot(aes(x = Age, y = ageg_prop, group = 1)) +
+  geom_line() +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  labs(y = "Proportion of total population", title = "Implied age structure in a stationary population") +
+  theme_bw()
 ```
 
-Goodman et al [-@goodman_family_1974]: **Stable populations also have an intrinsic kinship structure**:
+```
+## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
+```
+
+```
+## Warning: Removed 1 row(s) containing missing values (geom_path).
+```
+
+![](handout_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+
+We can generalise this to a stable population:
+
+\begin{equation}
+  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}e^{-rx}
+(\#eq:ageStab)
+\end{equation}
+
+
+where:
+
+- $r$ is the intrinsic rate of natural increase
+
+
+## Stable populations also have an intrinsic kinship structure
+
+According to Goodman et al [-@goodman_family_1974]:
 
 > A ﬁxed set of age-speciﬁc rates implies the probability that a girl aged *a* has a living mother and great-grandmother, as well as her expected number of daughters, sisters, aunts, nieces, and cousins. [@Keyfitz2005]
 
@@ -56,18 +166,13 @@ For example, this is the expected number of kin for an woman aged 80 ('Ego') in 
 
 
 ```{=html}
-<div id="htmlwidget-571d8002605f957de704" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-571d8002605f957de704">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0.014)\n  AOM  --> CAOM(coa: <br>0.142)\n  M   --> OS(os: <br>0.088)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.358)\n  AYM  --> CAYM(cya: <br>0.384)\n  OS   --> NOS(nos: <br>0.49)\n  E   ==> D(d: <br>1.023)\n  YS   --> NYS(nys: <br>0.607)\n  D   ==> GD(gd: <br>1.191)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7e1f3906d457a3485764" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7e1f3906d457a3485764">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0.014)\n  AOM  --> CAOM(coa: <br>0.142)\n  M   --> OS(os: <br>0.088)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.358)\n  AYM  --> CAYM(cya: <br>0.384)\n  OS   --> NOS(nos: <br>0.49)\n  E   ==> D(d: <br>1.023)\n  YS   --> NYS(nys: <br>0.607)\n  D   ==> GD(gd: <br>1.191)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
-## Assumptions and parameters
+## The Goodman-Keyfitz-Pullum (GKP) kinship equations
 
-1. Stable vs non-stable populations
-1. One-sex vs two-sex populations
-1. Recursive vs matrix implementations
-1. Analytic vs microsimulation
-
-## Living ancestors
+### Living ancestors
 
 The probability that a girl aged $a$ has a living mother in a stable population is:
 
@@ -150,7 +255,7 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
 
 ![](handout_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-## Living descendants
+### Living descendants
 
 The average number of surviving children is:
 
@@ -180,7 +285,7 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
 
 ![](handout_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
-## Other relatives
+### Other relatives
 
 The GKP recursive approach can get messy quickly. Consider the expected number of first cousins from the mother's older sisters' side:
 
@@ -211,7 +316,14 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
 
 ![](handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-## Removing the stable assumption
+### Assumptions and parameters
+
+1. Stable vs non-stable populations
+1. One-sex vs two-sex populations
+1. Recursive vs matrix implementations
+1. Analytic vs microsimulation
+
+### Removing the stable assumption
 
 Demographic rates change constantly in the real world - populations are rarely stable. Each of the stable identities given above have a non-stable equivalent, but we won't cover these given time limitations. As an example, consider the non-stable equivalent of the GKP equation for the number of surviving children is. 
 
@@ -236,7 +348,7 @@ where
 Note that the $(a-x,c+x)$ subscript allows us to replace the assumption of demographic stability present in the original formulation of the GKP equations with empirical rates.
 
 
-## A Matrix Formulation
+# Matrix Kinship Models
 
 New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2021;@caswell2021formal_two-sex].
 
@@ -346,8 +458,8 @@ plot_diagram(swe35_1950_stable[["kins_total"]])
 ```
 
 ```{=html}
-<div id="htmlwidget-fc52400f865469826918" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-fc52400f865469826918">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0)\n  AOM  --> CAOM(coa: <br>0.007)\n  M   --> OS(os: <br>0)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.037)\n  AYM  --> CAYM(cya: <br>0.088)\n  OS   --> NOS(nos: <br>0.248)\n  E   ==> D(d: <br>0.697)\n  YS   --> NYS(nys: <br>0.498)\n  D   ==> GD(gd: <br>1.156)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-c1fd1a651b057ab5adad" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c1fd1a651b057ab5adad">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0)\n  AOM  --> CAOM(coa: <br>0.007)\n  M   --> OS(os: <br>0)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.037)\n  AYM  --> CAYM(cya: <br>0.088)\n  OS   --> NOS(nos: <br>0.248)\n  E   ==> D(d: <br>0.697)\n  YS   --> NYS(nys: <br>0.498)\n  D   ==> GD(gd: <br>1.156)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 ## Experience of kin death
@@ -389,7 +501,19 @@ swe35_1950_nonstable_death[["lost_mean_age"]] %>% round(2)
 ## 23.29 21.97 28.83 34.73  9.39 20.04 25.19 25.24 30.74 24.88 22.93 24.80 20.50
 ```
 
-# Example: Women's experience of child death [@alburez-gutierrez_womens_2021]
+# Applications: Women's experience of child death [@alburez-gutierrez_womens_2021]
+
+*Research question*
+
+How can we characterise the experience of offspring loss from the vantage point of mothers?
+
+\begin{enumerate}
+     \item Methods: formal methods from kinship demography
+     \item Data: 2019 UN World Population Prospects estimates (1950-2020) and projections (2020-2100) for 201 countries 
+     \item Results: global estimates of prevalence and incidence of offspring loss over life, across cohorts, and around the world
+ \end{enumerate}
+
+## The Child Death identity
 
 In a non-stable population, the number of children ever born to a woman aged $a$ born in cohort $c$ standing before us will be equal to the number of children who are currently alive plus the children who died before the woman reached age $a$:
 
@@ -406,22 +530,11 @@ where
 
 **Explore results using this online application: https://diego-alburez.shinyapps.io/child_death_demography/**
 
-# Studies with a strong kinship component
-
-- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
-- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
-- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
-- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
-- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
-- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
-<!-- - Inheritance of demographic behaviour: Kolk  -->
-<!-- - Generational overlap:  -->
-
 # Rsoc: Demographic microsimulations in R made easy (bonus)
 
 **Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
 
-Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  [SOCSIM OVERSIMPLIFIED](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf)). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
+Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  [SOCSIM oversimplified](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf) document). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
 
 
 ```r
@@ -528,6 +641,7 @@ opop <-
   ) %>% 
   select(pid, mom, pop, fem, birth_year, death_year) %>% 
   # fem = 1 for women!
+  filter(fem == 1) %>% 
   # Remove founder generation (who have no mother)
   # People can still have no dads but that's fine because
   # Children of  unmarried couples get a 0 as id for their 
@@ -540,11 +654,11 @@ head(opop)
 ```
 ##   pid mom pop fem birth_year death_year
 ## 1   1   0   0   1   15.25000   98.91667
-## 2   2   0   0   0   19.08333  104.25000
-## 3   3   0   0   1   43.83333  136.00000
-## 4   4   0   0   0   41.08333  111.33333
-## 5   5   0   0   1   11.41667   86.75000
-## 6   6   0   0   0   11.16667   84.58333
+## 2   3   0   0   1   43.83333  136.00000
+## 3   5   0   0   1   11.41667   86.75000
+## 4   7   0   0   1   14.50000   81.08333
+## 5   9   0   0   1   47.91667  114.91667
+## 6  11   0   0   1   27.66667  115.25000
 ```
 
 Now, we estimate the probability of having a living mother from the Socsim microdata:
@@ -600,6 +714,73 @@ bind_rows(m1_soc, m1_mod) %>%
 
 ![](handout_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
-They almost match entirely. Maybe if the simulation was a bit larger, we would get a better fit...
+They almost match entirely. Maybe if the simulation was a bit larger or if we ran more simulations, we would get a better fit?
+
+Try running 5 simulations
+
+
+```r
+run_random_simulation <- function(seed){
+
+  seed <- as.character(seed)
+  # seed <- as.character(sample(1:1000, 1))
+
+  # Run simulations with random seed
+  rsoc::run1simulationwithfile(
+    folder = "rsoc"
+      , supfile = "sim_test.sup" 
+      , seed = seed
+    )
+  
+# read output
+  # Read simulation output population
+  opop <- read.table(file="rsoc/output_pop.opop", header=F, as.is=T)  
+  
+  ## assign names to columns
+  names(opop)<-c("pid","fem","group",
+                 "nev","dob","mom","pop","nesibm","nesibp",
+                 "lborn","marid","mstat","dod","fmult")
+  
+  opop <- 
+    opop %>% 
+    # Transform to years
+    mutate(
+      birth_year = dob/12
+      , death_year = dod/12
+    ) %>% 
+    select(pid, mom, pop, fem, birth_year, death_year) %>% 
+    filter(!is.na(mom))
+
+  m1_soc <- 
+    left_join(
+      opop %>% 
+        filter(mom != 0) %>% 
+        filter(birth_year >= 50) %>% 
+        select(ego = pid, mom, ego_dob = birth_year)
+      , opop %>% 
+        select(mom = pid, mom_dod = death_year)
+    ) %>% 
+    mutate(ego_age_mom_death = mom_dod - ego_dob) %>% 
+    filter(ego_age_mom_death > 0) %>% 
+    count(age = ego_age_mom_death) %>% 
+    arrange(age) %>% 
+    mutate(count = 1 - cumsum(n)/sum(n)) %>% 
+    select(age, count) %>% 
+    mutate(source = "socsim") %>% 
+    mutate(seed = seed)
+  
+  m1_soc
+}
+
+m1_soc_sims <- 
+  lapply(sample(1:1000, 5), run_random_simulation) %>% 
+  bind_rows()
+
+m1_soc_sims %>% 
+  ggplot(aes(x = age, y = count, colour = seed)) +
+  geom_line() +
+  labs(x = "Ego's age", y = "Probability that mother is alive") +
+  theme_bw()
+```
 
 ## References

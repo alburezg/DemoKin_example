@@ -1,9 +1,5 @@
 ---
 title: "Kinship Approaches in Demography or The Elementary Structures of Kinship"
-author: |
-   | Diego Alburez-Gutierrez,
-   | Lab of Digital and Computational Demography,
-   | Max Planck Institute for Demographic Research
 date: "Formal Demography Working Group - Feb 2022"
 header-includes:
   - \usepackage{amsmath}
@@ -25,6 +21,12 @@ output:
 }
 </style>
 
+<!-- author: | -->
+<!--    | Diego Alburez-Gutierrez, -->
+<!--    | Lab of Digital and Computational Demography, -->
+<!--    | Max Planck Institute for Demographic Research -->
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -40,25 +42,125 @@ library(latex2exp)
 
 Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.
 
-# Why kinship matters
+# What is kinship demography?
+
+Kinship is relevant for:
 
 - Socialisation, protection, and sustenance
 - Inter-generational solidarity: exchanges and bequests
 - Social structure and identity
 - Early-life conditions $\rightarrow$ later-life outcomes
 
-# The Goodman-Keyfitz-Pullum (GKP) equations
+## Studies with a strong kinship component
+
+- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
+- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
+- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
+- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
+- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
+- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
+<!-- - Inheritance of demographic behaviour: Kolk  -->
+<!-- - Generational overlap:  -->
+
+# Demographic kinship structures
+
+## Implied demographic characteristics
 
 Let's review the principle of demographic ergodicity:
 
 > A closed population with unchanging mortality and fertility rates has an implied (a) Intrinsic rate of natural increase $r$ and (2) age structure. 
 
+According to Wachter [-@wachter_essential_2014], the proportion of the population aged $x$ to $x+n$ in a stationary population is:
+
+\begin{equation}
+  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}
+(\#eq:ageStat)
+\end{equation}
+
+where:
+
+
+- $_{n}K_{x}$ is the size of the population aged $x$ to $x+n$
+- $b$ is the Crude Birth Rate
+- $_{n}L_{x}$ are person-years lived, and
+- $l_{0}$ is the radix
+
 ```{r}
-# Use Lexis matrices to show this
-# Animation?
+
+# Swedish life tables:
+# https://www.mortality.org/hmd/SWE/STATS/bltcoh_5x10.txt
+
+lt <- 
+  read.table("fltper_1x10.txt", header = T, skip = 2) %>% 
+  # Pick an arbitrary year
+  filter(Year == "1900-1909") %>% 
+  select(Age, lx, Lx) 
+
+  # Crude birh rate from HFD
+  # https://www.humanfertility.org/cgi-bin/country.php?country=SWE&tab=si
+  
+CBR <- read.table("SWEcbrRR.txt", header = T, skip = 2)
+
+# Function to get implied age structure in stationary population
+
+get_ageg_size <- function(age_keep, ...){
+
+  l0 <- lt$lx[1]
+  
+  nLx <- 
+    lt %>% 
+    filter(Age == age_keep) %>% 
+    pull(Lx)
+  
+  
+b <- CBR %>% 
+    filter(Year == "1905") %>% 
+    pull(CBR)
+  
+  out <- b * (nLx / l0)
+  names(out) <- age_keep
+  
+  out
+}
+
+
+ageg_size <- 
+  lapply(lt$Age, get_ageg_size) %>% 
+  unlist() 
+
+# Get proportions
+
+ageg_prop <- ageg_size / sum(ageg_size)
+
+ageg_prop %>% 
+  data.frame %>% 
+  rownames_to_column("Age") %>% 
+  mutate(Age = as.numeric(Age)) %>% 
+  ggplot(aes(x = Age, y = ageg_prop, group = 1)) +
+  geom_line() +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  labs(y = "Proportion of total population", title = "Implied age structure in a stationary population") +
+  theme_bw()
+
 ```
 
-Goodman et al [-@goodman_family_1974]: **Stable populations also have an intrinsic kinship structure**:
+
+We can generalise this to a stable population:
+
+\begin{equation}
+  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}e^{-rx}
+(\#eq:ageStab)
+\end{equation}
+
+
+where:
+
+- $r$ is the intrinsic rate of natural increase
+
+
+## Stable populations also have an intrinsic kinship structure
+
+According to Goodman et al [-@goodman_family_1974]:
 
 > A ﬁxed set of age-speciﬁc rates implies the probability that a girl aged *a* has a living mother and great-grandmother, as well as her expected number of daughters, sisters, aunts, nieces, and cousins. [@Keyfitz2005]
 
@@ -80,14 +182,9 @@ swe50_1950_stable <-
 plot_diagram(swe50_1950_stable[["kins_total"]])
 ```
 
-## Assumptions and parameters
+## The Goodman-Keyfitz-Pullum (GKP) kinship equations
 
-1. Stable vs non-stable populations
-1. One-sex vs two-sex populations
-1. Recursive vs matrix implementations
-1. Analytic vs microsimulation
-
-## Living ancestors
+### Living ancestors
 
 The probability that a girl aged $a$ has a living mother in a stable population is:
 
@@ -166,7 +263,7 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
   facet_wrap(~kin)
 ```
 
-## Living descendants
+### Living descendants
 
 The average number of surviving children is:
 
@@ -193,7 +290,7 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
   facet_wrap(~kin)
 ```
 
-## Other relatives
+### Other relatives
 
 The GKP recursive approach can get messy quickly. Consider the expected number of first cousins from the mother's older sisters' side:
 
@@ -221,7 +318,14 @@ swe50_1950_stable[["kins_by_age_ego"]] %>%
   facet_wrap(~kin)
 ```
 
-## Removing the stable assumption
+### Assumptions and parameters
+
+1. Stable vs non-stable populations
+1. One-sex vs two-sex populations
+1. Recursive vs matrix implementations
+1. Analytic vs microsimulation
+
+### Removing the stable assumption
 
 Demographic rates change constantly in the real world - populations are rarely stable. Each of the stable identities given above have a non-stable equivalent, but we won't cover these given time limitations. As an example, consider the non-stable equivalent of the GKP equation for the number of surviving children is. 
 
@@ -246,7 +350,7 @@ where
 Note that the $(a-x,c+x)$ subscript allows us to replace the assumption of demographic stability present in the original formulation of the GKP equations with empirical rates.
 
 
-## A Matrix Formulation
+# Matrix Kinship Models
 
 New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2021;@caswell2021formal_two-sex].
 
@@ -375,7 +479,19 @@ Given some portion of each relative was dead (remember we are talking about popu
 swe35_1950_nonstable_death[["lost_mean_age"]] %>% round(2)
 ```
 
-# Example: Women's experience of child death [@alburez-gutierrez_womens_2021]
+# Applications: Women's experience of child death [@alburez-gutierrez_womens_2021]
+
+*Research question*
+
+How can we characterise the experience of offspring loss from the vantage point of mothers?
+
+\begin{enumerate}
+     \item Methods: formal methods from kinship demography
+     \item Data: 2019 UN World Population Prospects estimates (1950-2020) and projections (2020-2100) for 201 countries 
+     \item Results: global estimates of prevalence and incidence of offspring loss over life, across cohorts, and around the world
+ \end{enumerate}
+
+## The Child Death identity
 
 In a non-stable population, the number of children ever born to a woman aged $a$ born in cohort $c$ standing before us will be equal to the number of children who are currently alive plus the children who died before the woman reached age $a$:
 
@@ -391,17 +507,6 @@ where
 - $l_{a-x}(c+x,n)$ is the survival probability until age $(a-x)$ for the cohort born in year $(c+x)$ in country $n$. It is the probability that the children of a woman who gave birth at age $x$ will survive until the woman potentially reaches age $a$.   
 
 **Explore results using this online application: https://diego-alburez.shinyapps.io/child_death_demography/**
-
-# Studies with a strong kinship component
-
-- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
-- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
-- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
-- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
-- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
-- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
-<!-- - Inheritance of demographic behaviour: Kolk  -->
-<!-- - Generational overlap:  -->
 
 # Rsoc: Demographic microsimulations in R made easy (bonus)
 
@@ -450,6 +555,7 @@ opop <-
   ) %>% 
   select(pid, mom, pop, fem, birth_year, death_year) %>% 
   # fem = 1 for women!
+  filter(fem == 1) %>% 
   # Remove founder generation (who have no mother)
   # People can still have no dads but that's fine because
   # Children of  unmarried couples get a 0 as id for their 
@@ -512,7 +618,7 @@ They almost match entirely. Maybe if the simulation was a bit larger or if we ra
 
 Try running 5 simulations
 
-```{r}
+```{r, eval = F}
 
 run_random_simulation <- function(seed){
 
