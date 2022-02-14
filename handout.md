@@ -1,6 +1,9 @@
 ---
-title: "Kinship Approaches in Demography or The Elementary Structures of Kinship"
-date: "Formal Demography Working Group - Feb 2022"
+title: "DemoKin: An R package to compute kinship networks in stable and non-stable populations"
+date: "Formal Demography Working Group - Feb 25 2022"
+author: |
+   | Ivan Williams (Universidad de Buenos Aires)
+   | Diego Alburez-Gutierrez* (Max Planck Institute for Demographic Research)
 header-includes:
   - \usepackage{amsmath}
 bibliography: kinship.bib
@@ -10,9 +13,9 @@ output:
     number_sections: true
     code_folding: show
     toc: true
-    toc_depth: 1
+    toc_depth: 2
     toc_float: 
-      collapsed: true
+      collapsed: false
 ---
 
 <style type="text/css">
@@ -21,766 +24,588 @@ output:
 }
 </style>
 
-<!-- author: | -->
-<!--    | Diego Alburez-Gutierrez, -->
-<!--    | Lab of Digital and Computational Demography, -->
-<!--    | Max Planck Institute for Demographic Research -->
 
 
+> **Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.**
 
+# The DemoKin package
 
-Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.
+`DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. 
+The package is an R-language implementation of Caswell [-@caswell_formal_2019;-@caswell_formal_2021] and draws on previous theoretical development by Goodman, Keyfitz and Pullum [-@goodman_family_1974]. 
 
-# What is kinship demography?
+## Installation
 
-Kinship is relevant for:
-
-- Socialisation, protection, and sustenance
-- Inter-generational solidarity: exchanges and bequests
-- Social structure and identity
-- Early-life conditions $\rightarrow$ later-life outcomes
-
-## Studies with a strong kinship component
-
-- Mortality shocks on kinship structure [@zagheni_impact_2011;@verdery_tracking_2020]
-- Kinship transitions: [@murphy_long-term_2011;@verdery_links_2015] 
-- Bereavement: [@alburez-gutierrez_womens_2021;@smith-greenaway_global_2021]
-- Kin availability: [@wachter_kinship_1997;@alburezgutierrez_sandwich_2021] 
-- Grandparenthood [@margolis_changing_2016;@margolis_cohort_2019;@verdery2017projections]
-- Other social phenomena: [@alburez-gutierrez_demographic_2021;@song2021role]
-<!-- - Inheritance of demographic behaviour: Kolk  -->
-<!-- - Generational overlap:  -->
-
-# Demographic kinship structures
-
-## Implied demographic characteristics
-
-Let's review the principle of demographic ergodicity:
-
-> A closed population with unchanging mortality and fertility rates has an implied (a) Intrinsic rate of natural increase $r$ and (2) age structure. 
-
-According to Wachter [-@wachter_essential_2014], the proportion of the population aged $x$ to $x+n$ in a stationary population is:
-
-\begin{equation}
-  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}
-(\#eq:ageStat)
-\end{equation}
-
-where:
-
-
-- $_{n}K_{x}$ is the size of the population aged $x$ to $x+n$
-- $b$ is the Crude Birth Rate
-- $_{n}L_{x}$ are person-years lived, and
-- $l_{0}$ is the radix
+You can install the development version from GitHub with:
 
 
 ```r
-# Swedish life tables:
-# https://www.mortality.org/hmd/SWE/STATS/bltcoh_5x10.txt
-
-lt <- 
-  read.table("fltper_1x10.txt", header = T, skip = 2) %>% 
-  # Pick an arbitrary year
-  filter(Year == "1900-1909") %>% 
-  select(Age, lx, Lx) 
-
-  # Crude birh rate from HFD
-  # https://www.humanfertility.org/cgi-bin/country.php?country=SWE&tab=si
-  
-CBR <- read.table("SWEcbrRR.txt", header = T, skip = 2)
-
-# Function to get implied age structure in stationary population
-
-get_ageg_size <- function(age_keep, ...){
-
-  l0 <- lt$lx[1]
-  
-  nLx <- 
-    lt %>% 
-    filter(Age == age_keep) %>% 
-    pull(Lx)
-  
-  
-b <- CBR %>% 
-    filter(Year == "1905") %>% 
-    pull(CBR)
-  
-  out <- b * (nLx / l0)
-  names(out) <- age_keep
-  
-  out
-}
-
-
-ageg_size <- 
-  lapply(lt$Age, get_ageg_size) %>% 
-  unlist() 
-
-# Get proportions
-
-ageg_prop <- ageg_size / sum(ageg_size)
-
-ageg_prop %>% 
-  data.frame %>% 
-  rownames_to_column("Age") %>% 
-  mutate(Age = as.numeric(Age)) %>% 
-  ggplot(aes(x = Age, y = ageg_prop, group = 1)) +
-  geom_line() +
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-  labs(y = "Proportion of total population", title = "Implied age structure in a stationary population") +
-  theme_bw()
+# install.packages("devtools")
+devtools::install_github("IvanWilli/DemoKin")
 ```
 
-```
-## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-```
+## The function `kins()`
 
-```
-## Warning: Removed 1 row(s) containing missing values (geom_path).
-```
-
-![](handout_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
-
-
-We can generalise this to a stable population:
-
-\begin{equation}
-  \frac{_{n}K_{x}}{_{\infty}K_{0}} = b\frac{_{n}L_{x}}{l_{0}}e^{-rx}
-(\#eq:ageStab)
-\end{equation}
-
-
-where:
-
-- $r$ is the intrinsic rate of natural increase
-
-
-## Stable populations also have an intrinsic kinship structure
-
-According to Goodman et al [-@goodman_family_1974]:
-
-> A ﬁxed set of age-speciﬁc rates implies the probability that a girl aged *a* has a living mother and great-grandmother, as well as her expected number of daughters, sisters, aunts, nieces, and cousins. [@Keyfitz2005]
-
-For example, this is the expected number of kin for an woman aged 80 ('Ego') in a female population that experiences the 1950 Swedish demographic rates ad-infinitum:
-
-
-```{=html}
-<div id="htmlwidget-7e1f3906d457a3485764" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7e1f3906d457a3485764">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0.014)\n  AOM  --> CAOM(coa: <br>0.142)\n  M   --> OS(os: <br>0.088)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.358)\n  AYM  --> CAYM(cya: <br>0.384)\n  OS   --> NOS(nos: <br>0.49)\n  E   ==> D(d: <br>1.023)\n  YS   --> NYS(nys: <br>0.607)\n  D   ==> GD(gd: <br>1.191)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
-```
-
-## The Goodman-Keyfitz-Pullum (GKP) kinship equations
-
-### Living ancestors
-
-The probability that a girl aged $a$ has a living mother in a stable population is:
-
-
-\begin{equation}
-M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} e^{-rx}l(x)m(x) \:dx}
-(\#eq:m1a)
-\end{equation}
-
-where
-
-- $\alpha$ and $\beta$ represent the start and the end of the reproductive period
-- $m_x$ is a vector of age-specific fertility rates
-- is a vector of survival probabilities $l_x$
-
-Conditional on ego's survival, $M_1{(a)}$ can be thought of as a survival probability in a life table: it has to be equal to one when $a$ is equal to zero (the mother is alive when she gives birth), and goes monotonically to zero. 
-
-We can also approximate $M_1(a)$ in relation to the mean age at childbearing $\mu$.
-Assuming $\mu$ to be the average length of a generation in a stable population, we can rewrite Eq. \@ref(eq:m1a) as follows:
-
-\begin{equation}
-M_1(a) \approx \frac{l_{\mu + a}}{l_{\mu}}.
-(\#eq:approx)
-\end{equation}
-
-We can visualise this in a Lexis Diagram [@Keyfitz2005]:
-
-![](handout_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
-
-
-Eq. \@ref(eq:approx) states that the probability that a girl alive at age $a$ has a living mother is approximately equal to the probability that women in the population are alive $a$ years past the mean age at childbearing, conditional on them being alive at the mean age at childbearing.
+`DemoKin::kins()` currently does most of the heavy lifting in terms of implementing matrix kinship models. 
+This is what it looks like in action, in this case assuming demographic stability:
 
 
 ```r
-swe50_1950_stable[["kins_by_age_ego"]] %>%
-  select(x, m) %>% 
-  gather(kin, count, -x) %>%
-  ggplot() +
-  geom_line(aes(x, count))  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Probability that mother is alive") 
-```
+library(DemoKin)
 
-![](handout_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
-
-To generalise to older generations, let us first define the age distribution of women as $W(x) = e^{-rx}l(x)m(x)$, so that Eq. \@ref(eq:m1a) becomes:
-
-\begin{equation}
-M_1(a) = \int_{\alpha}^{\beta}{\frac{l(x+a)}{l(x)} W(x)  dx}.
-(\#eq:m1a)
-\end{equation}
-
-The average number of grandmothers is:
-
-\begin{equation}
-M_2(a) = \int_{\alpha}^{\beta}{ M_1(x+a) W(x) \:dx};
-\label{eq:m2a}
-\end{equation}
-
-of great-grandmothers:
-
-\begin{equation}
-M_3(a) = \int_{\alpha}^{\beta}{ M_2(x+a) W(x) \:dx};
-\label{eq:m3a}
-\end{equation}
-
-and so on.
-
-
-```r
-swe50_1950_stable[["kins_by_age_ego"]] %>%
-  select(x, `A. grandmother` = gm, `B. great-grandmother` = ggm) %>% 
-  gather(kin, count, -x) %>%
-  ggplot() +
-  geom_line(aes(x, count))  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving") +
-  facet_wrap(~kin)
-```
-
-![](handout_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
-
-### Living descendants
-
-The average number of surviving children is:
-
-\begin{equation}
-B_1(a) = \int_{\alpha}^{a}{m(x) l(a-x) \: dx}
- (\#eq:b1)
-\end{equation}
-
-The expected number of surviving grandchildren is: 
-
-\begin{equation}
-B_2(a) = \int_{\alpha}^{a}{m(x)\int_{\alpha}^{a-x}{l(y) m(y) \: dy }\:dx}.
-\label{eq:b2}
-\end{equation}
-
-
-```r
-swe50_1950_stable[["kins_by_age_ego"]] %>%
-  select(x, daughter = d, granddaughter = gd) %>% 
-  gather(kin, count, -x) %>%
-  ggplot() +
-  geom_line(aes(x, count))  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving") +
-  facet_wrap(~kin)
-```
-
-![](handout_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
-
-### Other relatives
-
-The GKP recursive approach can get messy quickly. Consider the expected number of first cousins from the mother's older sisters' side:
-
-
-\begin{equation}
-C_1(a) = \int_{\alpha}^{\beta} {\left[ \int_{\alpha}^{\beta}{ \left\{ \int_{\alpha}^{y}{\left( \int_{\alpha}^{a+x+y-z}{l(w)m(w) \: dw} \right)} m(z) \: dz \right\}  } \: W(y) \: dy \right] \: W(x) \: dx},
-    \label{eq:cousin1}
-\end{equation}
-
-where $W(x)$ is the age distribution of the women:
-
-\begin{equation}
-W(x) = e^{-rx}l(x)m(x).
-    \label{wx}
-\end{equation}
-
-
-```r
-swe50_1950_stable[["kins_by_age_ego"]] %>%
-  select(x, `younger aunt` = cya, `older aunt` = coa) %>% 
-  gather(kin, count, -x) %>%
-  ggplot() +
-  geom_line(aes(x, count))  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving cousins through") +
-  facet_wrap(~kin)
-```
-
-![](handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
-
-### Assumptions and parameters
-
-1. Stable vs non-stable populations
-1. One-sex vs two-sex populations
-1. Recursive vs matrix implementations
-1. Analytic vs microsimulation
-
-### Removing the stable assumption
-
-Demographic rates change constantly in the real world - populations are rarely stable. Each of the stable identities given above have a non-stable equivalent, but we won't cover these given time limitations. As an example, consider the non-stable equivalent of the GKP equation for the number of surviving children is. 
-
-First, remember the stable equation presented in Eq.\@ref(eq:b1):
-
-\begin{equation}
-M_1(a) = \int_{\alpha}^{a}{m(x) l(a-x) \: dx}.
-\end{equation}
-
-The expected number of surviving children for an average woman aged $a$ born in year $c$ in a non-stable population is:
-
-\begin{equation}
-M_1(a,c) = \sum_{x=\alpha}^{a}{F(x,c) l(a-x,c+x)}
-\label{eq:b1_dic}
-\end{equation}
-
-where 
-
-- $_1F_{(x,c)}$ represents age-specific fertility rates for cohort $c$ at age $x$
-- $l_{(a-x,c+x)}$ are the survival probability until age $(a-x)$ for the cohort born in year $(c+x)$. It is the probability that the children of a woman who gave birth at age $x$ will survive until the woman potentially reaches age $a$. 
-
-Note that the $(a-x,c+x)$ subscript allows us to replace the assumption of demographic stability present in the original formulation of the GKP equations with empirical rates.
-
-
-# Matrix Kinship Models
-
-New developments by [@caswell_formal_2019;@caswell_formal_2020;@caswell_formal_2021;@caswell2021formal_two-sex].
-
-Let $\textbf{b}(x+1)$ be the population of Ego's granddaughters at time $(x+1)$ ($\textbf{b}_{0} = \textbf{0}$ because Ego has no granddaughters at birth), $\textbf{U}$ be a matrix with survival probabilities in the subdiagonal, $\textbf{F}$ be a matrix with fertility rates in the first row and zeros elsewhere, and $\textbf{a}$ be the population of surviving daughters at time $x$:
-
-\begin{equation}
-\label{eq:matrix}
-    \underbrace{\textbf{b}(x+1)}_{\substack{\text{Population of}\\ \text{granddaughters}}} = \underbrace{\textbf{Ub}(x)}_{\text{Granddaughter survival}}  + \underbrace{\textbf{Fa}(x).}_{\substack{\text{Granddaughters}\\ \text{born from daughters}}}
-\end{equation}
-
-# DemoKin: An R package to estimate kinship networks in stable and non-stable populations
-
-**Iván Williams, Diego Alburez-Gutierrez, and Xi Song**; https://github.com/IvanWilli/DemoKin
-
-## Kin counts in stable populations
-
-We can estimate this in a **stable** framework using data from 1995, assuming that all of Egos' relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
-
-
-```r
-swe35_1950_stable <- 
+stable <- 
   kins(
-    ego_age = 100
-    , year = 1950
-    , P = swe_surv
-    , asfr = swe_asfr
+    U = swe_surv
+    , f = swe_asfr
     , stable = TRUE
-    , alive = "yes"
+    , ego_year = 1950
+    , selected_kins = NULL
+    , living = TRUE
     )
 ```
 
-Let's visualize the distribution of relatives over ego's lifecourse:
+### Arguments
+
+- **U** matrix; survival ratio by age from a life table 
+- **f** matrix; age specific fertility rate by age (simple ages). 
+- **N** matrix; only needed for non-stable computation 
+- **stable** logical string 
+- **ego_year** string; period years of interest
+- **ego_cohort** string; birth cohorts of interest
+- **pi** matrix; distribution of ages of mothers (see Caswell [@-caswell_formal_2019])
+- **birth_female** numeric; proportion of births that are female
+- **selected_kins** string; relatives to compute. If `NULL`, return values for all relatives
+- **living** logical; whether to compute values for living or deceased relatives 
+
+Note that `DemoKin` only requires period demographic rate data as input!
+
+### Details
+
+Relatives for the `selected_kins` argument are identified by a unique code:
+
+
+|Code |Relative                   |
+|:----|:--------------------------|
+|coa  |Cousins from older aunt    |
+|cya  |Cousins from younger aunt  |
+|d    |Daughter                   |
+|gd   |Grand-daughter             |
+|ggd  |Great-grand-daughter       |
+|ggm  |Great-grandmother          |
+|gm   |Grandmother                |
+|m    |Mother                     |
+|nos  |Nieces from older sister   |
+|nys  |Nieces from younger sister |
+|oa   |Aunt older than mother     |
+|ya   |Aunt younger than mother   |
+|os   |Older sister               |
+|ys   |Younger sister             |
+
+Let's write a simple function to identify relatives based on their respective codes:
 
 
 ```r
-swe35_1950_stable[["kins_by_age_ego"]] %>%
-              gather(kin, count, -x) %>%
-              ggplot() +
-              geom_line(aes(x, count))  +
-              geom_vline(xintercept = 35, color=2)+
-              theme_bw() +
-              labs(x = "Ego's age") +
-              facet_wrap(~kin)
+rename_kin <- function(df){
+  df$kin <- relatives[df$kin]
+  df
+}
 ```
 
-![](handout_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+## Built-in data
 
-Where each relative type is identified by a unique code:
-
-
-|Code |Relative                                   |
-|:----|:------------------------------------------|
-|coa  |Cousins (through aunt older than mother)   |
-|cya  |Cousins (through aunt younger than mother) |
-|d    |Daughter                                   |
-|gd   |Grand-daughter                             |
-|ggm  |Great-grandmother                          |
-|gm   |Grandmother                                |
-|m    |Mother                                     |
-|nos  |Nieces through older sister                |
-|nys  |Nieces through younger sister              |
-|oa   |Aunt older than mother                     |
-|ya   |Aunt younger than mother                   |
-|os   |Older sister                               |
-|ys   |Younger sister                             |
-
-We can also visualize the age distribution of relatives when Ego is 35:
+The `DemoKin` package includes data from Sweden as an example. 
+The data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). 
+These datasets were loaded using the`DemoKin::get_HMDHFD` function.
+To list the data:
 
 
 ```r
-swe35_1950_stable[["kins_by_age_kin"]] %>%
-              select(-x) %>% 
-              gather(kin, count, -x_kin) %>%
-              ggplot() +
-              geom_line(aes(x_kin, count))  +
-              geom_vline(xintercept = 35, color=2)+
-              labs(x = "Age of kin") +
-              theme_bw() +
-              facet_wrap(~kin)
-```
-
-![](handout_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
-
-
-The function also includes data on the mean age of Ego's relatives at her actual age:
-
-
-```r
-swe35_1950_stable[["kins_mean_age"]] %>% 
-  round(1) %>% 
-  sort() %>% 
-  t() %>% 
-  kable()
+data(package="DemoKin")
 ```
 
 
+|Item     |Title                                                  |
+|:--------|:------------------------------------------------------|
+|swe_asfr |Swedish age-specific fertility rates from 1900 to 2015 |
+|swe_pop  |Female swedish population from 1900 to 2015            |
+|swe_surv |Female swedish survival ratios from 1900 to 2015       |
 
-|   gd|  nys|    d|  nos|  cya|   ys|  coa|   ya| ggm|  gm|   m|  oa|  os|
-|----:|----:|----:|----:|----:|----:|----:|----:|---:|---:|---:|---:|---:|
-| 42.5| 62.2| 69.7| 73.3| 78.1| 84.4| 85.9| 95.1| 100| 100| 100| 100| 100|
+The in-built data sets are:
 
-We can visualize the estimated kin counts for Ego at age 35 in a stable population using a network diagram:
+- **swe_surv** matrix; survival ratio by age (DemoKin's *U* argument)
+
+This is what the data looks like:
 
 
 ```r
-plot_diagram(swe35_1950_stable[["kins_total"]])
+swe_surv[1:4, 1:4]
+```
+
+```
+##        1900      1901      1902      1903
+## 2 0.9566306 0.9555890 0.9624144 0.9611063
+## 3 0.9786518 0.9792724 0.9807146 0.9818320
+## 4 0.9875967 0.9876130 0.9885345 0.9897997
+## 5 0.9907708 0.9904054 0.9915360 0.9923815
+```
+
+And plotted over time and age:
+
+
+```r
+library(fields)
+
+image.plot(
+  x = as.numeric(colnames(swe_surv))
+  , y = 0:nrow(swe_surv)
+  , z = t(as.matrix(swe_surv))
+  , xlab = "Year"
+  , ylab = "Survival ratio (U)"
+  )
+```
+
+![](handout_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+- **swe_asfr** matrix; age specific fertility rate (DemoKin's *f* argument)
+
+This is what the data looks like:
+
+
+```r
+swe_asfr[1:4, 1:4]
+```
+
+```
+##   1900 1901 1902 1903
+## 1    0    0    0    0
+## 2    0    0    0    0
+## 3    0    0    0    0
+## 4    0    0    0    0
+```
+
+And plotted over time and age:
+
+
+```r
+image.plot(
+  x = as.numeric(colnames(swe_asfr))
+  , y = 0:nrow(swe_asfr)
+  , z = t(as.matrix(swe_asfr))
+  , xlab = "Year"
+  , ylab = "Age-specific fertility (f)"
+  )
+```
+
+![](handout_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+- **swe_pop** matrix; population by age (Demokin's *N* argument)
+
+This is what the data looks like:
+
+
+```r
+swe_pop[1:4, 1:4]
+```
+
+```
+## # A tibble: 4 x 4
+##   `1900` `1901` `1902` `1903`
+##    <dbl>  <dbl>  <dbl>  <dbl>
+## 1  60917  62601  63337  63500
+## 2  58927  57549  59573  60627
+## 3  56823  57590  56426  58381
+## 4  56473  55916  56887  55669
+```
+
+And plotted over time and age:
+
+
+```r
+image.plot(
+  x = as.numeric(colnames(swe_pop))
+  , y = 0:nrow(swe_pop)
+  , z = t(as.matrix(swe_pop))
+  , xlab = "Year"
+  , ylab = "Population totals by age (N)"
+  )
+```
+
+![](handout_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+## Value
+
+`DemoKin::kins()` returns a list with two elements.
+
+- **kins_by_age_ego** is a data frame of ...
+
+
+```r
+head(stable$kins_by_age_ego)
+```
+
+```
+## # A tibble: 6 x 7
+##    year cohort age_ego kin   total mean_age sd_age
+##   <dbl>  <dbl>   <int> <chr> <dbl>    <dbl>  <dbl>
+## 1     0      0       0 coa   0.402    10.2    7.42
+## 2     0      0       0 cya   0.134     5.04   4.42
+## 3     0      0       0 d     0       NaN    NaN   
+## 4     0      0       0 gd    0       NaN    NaN   
+## 5     0      0       0 ggd   0       NaN    NaN   
+## 6     0      0       0 ggm   0.327    73.9    7.17
+```
+
+- **kins** is a data frame of ...
+
+
+```r
+head(stable$kins)
+```
+
+```
+##   kin age_kin alive age_ego count cohort year
+## 1   d       0   yes       0     0      0    0
+## 2   d       1   yes       0     0      0    0
+## 3   d       2   yes       0     0      0    0
+## 4   d       3   yes       0     0      0    0
+## 5   d       4   yes       0     0      0    0
+## 6   d       5   yes       0     0      0    0
+```
+
+We'll see what these means in the examples below.
+
+# Example 1: kin counts in stable populations
+
+Following Caswell [-@caswell_formal_2019], we assume a female closed population in which everyone experiences the Swedish 1950 mortality and fertility rates at each age throughout their life.
+We then ask:
+
+> How can we characterize the kinship network of an average member of the population (call her 'Ego')?
+
+For this exercise, we'll use the Swedish data pre-loaded with `DemoKin`.
+
+
+```r
+library(DemoKin)
+
+system.time(
+  stable <- 
+  kins(
+    ego_year = 1950
+    , U = swe_surv
+    , f = swe_asfr
+    , stable = TRUE
+    )
+)
+```
+
+```
+##    user  system elapsed 
+##    0.64    0.02    0.66
+```
+
+## 'Keyfitz' kinship diagram
+
+We can visualize the implied kin counts for an Ego aged 35 yo in a stable population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] using the `plot_diagram` function:
+
+
+```r
+stable$kins_by_age_ego %>% 
+  filter(age_ego == 35) %>% 
+  select(kin, total) %>% 
+  plot_diagram()
 ```
 
 ```{=html}
-<div id="htmlwidget-c1fd1a651b057ab5adad" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c1fd1a651b057ab5adad">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0)\n  GM  --> AOM(oa: <br>0)\n  GM  ==> M(m: <br>0)\n  GM  --> AYM(ya: <br>0)\n  AOM  --> CAOM(coa: <br>0.007)\n  M   --> OS(os: <br>0)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.037)\n  AYM  --> CAYM(cya: <br>0.088)\n  OS   --> NOS(nos: <br>0.248)\n  E   ==> D(d: <br>0.697)\n  YS   --> NYS(nys: <br>0.498)\n  D   ==> GD(gd: <br>1.156)\n  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;\n  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-df415e452860e04d8264" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-df415e452860e04d8264">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
-## Experience of kin death
+## Expected kin counts for an Ego surviving to each age
 
-Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see how many relatives Ego loss during her life (output `kins_death_by_age_ego`), in a stable framework:
+Let's visualize how the expected number of daughters, siblings, cousins, etc., changes over the lifecourse of Ego.
 
 
 ```r
-swe35_1950_nonstable_death <- 
-    kins(
-    ego_age = 35
-    , year = 1950
-    , P = swe_surv
-    , asfr = swe_asfr
-    , stable = TRUE
-    , alive = "no"
-    )
-
-swe35_1950_nonstable_death[["kins_cum_death_by_age_ego"]] %>%
-  gather(kin, count, -x,) %>%
+stable$kins_by_age_ego %>%
+  rename_kin() %>% 
   ggplot() +
-  geom_line(aes(x, count))  +
+  geom_line(aes(age_ego, total))  +
   geom_vline(xintercept = 35, color=2)+
   theme_bw() +
-  facet_wrap(~kin,scales="free")
+  labs(x = "Ego's age") +
+  facet_wrap(~kin)
 ```
 
-![](handout_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](handout_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
-Given some portion of each relative was dead (remember we are talking about population measures), we can ask what was the mean age at lost for each kin:
+It's a bit too much information. 
+Let's consider different kin types in isolation. 
+
+We start by looking at **living ancestors**.
 
 
 ```r
-swe35_1950_nonstable_death[["lost_mean_age"]] %>% round(2)
+stable$kins_by_age_ego %>%
+  filter(kin %in% c("m", "gm", "ggm")) %>%
+  rename_kin() %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving") 
 ```
 
-```
-##   coa   cya     d    gd   ggm    gm     m   nos   nys    oa    os    ya    ys 
-## 23.29 21.97 28.83 34.73  9.39 20.04 25.19 25.24 30.74 24.88 22.93 24.80 20.50
-```
+![](handout_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
-# Applications: Women's experience of child death [@alburez-gutierrez_womens_2021]
-
-*Research question*
-
-How can we characterise the experience of offspring loss from the vantage point of mothers?
-
-\begin{enumerate}
-     \item Methods: formal methods from kinship demography
-     \item Data: 2019 UN World Population Prospects estimates (1950-2020) and projections (2020-2100) for 201 countries 
-     \item Results: global estimates of prevalence and incidence of offspring loss over life, across cohorts, and around the world
- \end{enumerate}
-
-## The Child Death identity
-
-In a non-stable population, the number of children ever born to a woman aged $a$ born in cohort $c$ standing before us will be equal to the number of children who are currently alive plus the children who died before the woman reached age $a$:
-
-
-\begin{equation}
-\underbrace{CD(a,c,n)}_{\text{Child deaths}}= \underbrace{\sum_{x=15}^{x=a} {_1F_{x}(c,n)}}_{\text{Children born}}-\underbrace{\sum_{x=15}^{x=a} {_1F_{x}(c,n)} l_{a-x}(c+x,n)}_{\text{Children surviving or } CS(a,c,n) }
-(\#eq:CD)
-\end{equation}
-
-where 
-
-- $_1F_{x}(c,n)$ are single-year age-specific fertility rates for cohort $c$ and country $n$, at age $x$. The lower age boundary in this and all models is 15, representing the start of a woman's reproductive life. 
-- $l_{a-x}(c+x,n)$ is the survival probability until age $(a-x)$ for the cohort born in year $(c+x)$ in country $n$. It is the probability that the children of a woman who gave birth at age $x$ will survive until the woman potentially reaches age $a$.   
-
-**Explore results using this online application: https://diego-alburez.shinyapps.io/child_death_demography/**
-
-# Rsoc: Demographic microsimulations in R made easy (bonus)
-
-**Tom Theile and Diego Alburez-Gutierrez**; https://github.com/tomthe/rsoc
-
-Use the in-built functions in `Rsoc` to run a simple simulation from scratch. For this example, we'll just simulate a stable population. We don't have time to discuss SOCSIM simulations in full (the best introduction is still Carl Mason's  [SOCSIM oversimplified](https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf) document). However, if you're interested, this is the 'instruction' file that we give to the simulator in order to simulate a stable population based on Sweden's 1950 demographic rates:
+Next on, we see **living descendants**.
 
 
 ```r
-cat(readLines("rsoc/sim_test.sup"), sep = "\n")
-```
-
-```
-## *Supervisory file for a stable population
-## * 20220120
-## marriage_queues 1
-## bint 10
-## segments 1
-## marriage_eval distribution
-## input_file init_new
-## output_file output_pop
-## *
-## duration 2400
-## include SWEfert1950
-## include SWEmort1950
-##  run
-```
-
-Let's run the simulation using `rsoc`:
-
-
-```r
-# library(rsoc)
-
-folder <- "rsoc"
-seed <- "42"
-
-# name of the supplement-file, relative to the above folder:
-supfile <- "sim_test.sup" 
-
-# run1simulationwithfile starts a simulation with the specified sup-file
-rsoc::run1simulationwithfile(folder, supfile, seed)
-```
-
-```
-## [1] "Start run1simulationwithfile"
-## [1] "rsoc"
-## [1] "42"
-## Start Socsim
-## start socsim main 
-## 
-## ratefile: sim_test.sup
-## 
-## Socsim Version: STANDARD-UNENHANCED-VERSION
-## initialize_segment_vars
-## initialize_segment_vars done
-## loading -.sup-file: sim_test.sup
-## ------------7
-```
-
-```
-## Warning in startSocsimWithFile(supfile, seed): can't openmarriage file Hope
-## that's OK
-```
-
-```
-## Warning in startSocsimWithFile(supfile, seed): can't open transition history
-## file. Hope that's OK
-```
-
-```
-## 
-##  output file names:
-##  init_new.opop|init_new.omar|init_new.opox|output_pop.pyr|output_pop.stat|init_new.otx|
-## fix pop pointers..
-## Starting month is 601
-## Initial size of pop 8000  (living: 8000)
-## New events generated for all living persons
-## ------------b1
-## 
-## Socsim Main Done
-## Socsim Done.inf
-## [1] "C:/cloud2/_static/workshops, roundtable sessions/20220101_kinship_formal_demography_wg/kinship_formal_demo"
-```
-
-```
-## [1] 1
-```
-
-Now, let's replicate one of the measures we obtained with the formal model: the probability that an average member of the population has a living mother. 
-
-First, we read the SOCSIM output:
-
-
-```r
-# Read simulation output population
-opop <- read.table(file="rsoc/output_pop.opop", header=F, as.is=T)  
-  
-## assign names to columns
-names(opop)<-c("pid","fem","group",
-                 "nev","dob","mom","pop","nesibm","nesibp",
-                 "lborn","marid","mstat","dod","fmult")
-  
-opop <- 
-  opop %>% 
-  # Transform to years
-  mutate(
-    birth_year = dob/12
-    , death_year = dod/12
-  ) %>% 
-  select(pid, mom, pop, fem, birth_year, death_year) %>% 
-  # fem = 1 for women!
-  filter(fem == 1) %>% 
-  # Remove founder generation (who have no mother)
-  # People can still have no dads but that's fine because
-  # Children of  unmarried couples get a 0 as id for their 
-  # father by default.
-  filter(!is.na(mom))
-  
-head(opop)
-```
-
-```
-##   pid mom pop fem birth_year death_year
-## 1   1   0   0   1   15.25000   98.91667
-## 2   3   0   0   1   43.83333  136.00000
-## 3   5   0   0   1   11.41667   86.75000
-## 4   7   0   0   1   14.50000   81.08333
-## 5   9   0   0   1   47.91667  114.91667
-## 6  11   0   0   1   27.66667  115.25000
-```
-
-Now, we estimate the probability of having a living mother from the Socsim microdata:
-
-
-```r
-# Estimates from SOCSIM
-m1_soc <- 
-left_join(
-  opop %>% 
-    filter(mom != 0) %>% 
-    filter(birth_year >= 50) %>% 
-    select(ego = pid, mom, ego_dob = birth_year)
-  , opop %>% 
-    select(mom = pid, mom_dod = death_year)
-) %>% 
-  mutate(ego_age_mom_death = mom_dod - ego_dob) %>% 
-  filter(ego_age_mom_death > 0) %>% 
-  count(age = ego_age_mom_death) %>% 
-  arrange(age) %>% 
-  mutate(count = 1 - cumsum(n)/sum(n)) %>% 
-  select(age, count) %>% 
-  mutate(source = "socsim")
-
-m1_soc %>% 
-  ggplot(aes(x = age, y = count, colour = source)) +
-  geom_line() +
-  labs(x = "Ego's age", y = "Probability that mother is alive") +
-  theme_bw()
+stable$kins_by_age_ego %>%
+  filter(kin %in% c("d", "gd", "ggd")) %>%
+  rename_kin() %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving")
 ```
 
 ![](handout_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
-How does it compare with the model-derived values obtained from `DemoKin` above?
+We also have kin counts for **horizontal kin**.
 
 
 ```r
-# Get estimates from model
-m1_mod <- 
-  swe50_1950_stable[["kins_by_age_ego"]] %>%
-  select(x, m) %>% 
-  gather(kin, count, -x) %>% 
-  select(age = x, count) %>% 
-  mutate(source = "model")
-
-
-bind_rows(m1_soc, m1_mod) %>% 
-  ggplot(aes(x = age, y = count, colour = source)) +
-  geom_line() +
-  labs(x = "Ego's age", y = "Probability that mother is alive") +
-  theme_bw()
+stable$kins_by_age_ego %>%
+  filter(kin %in% c("os", "ys", "cya", "coa")) %>%
+  rename_kin() %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Expected number of surviving")
 ```
 
 ![](handout_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
-They almost match entirely. Maybe if the simulation was a bit larger or if we ran more simulations, we would get a better fit?
-
-Try running 5 simulations
+How does **overall family size** vary over life for an average woman who survives to each age?
 
 
 ```r
-run_random_simulation <- function(seed){
+stable$kins_by_age_ego %>%
+  group_by(age_ego) %>% 
+  summarise(total = sum(total)) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total), size = 1)  +
+  theme_bw() +
+  labs(x = "Ego's age", y = "Average family size (women only)")
+```
 
-  seed <- as.character(seed)
-  # seed <- as.character(sample(1:1000, 1))
+![](handout_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
-  # Run simulations with random seed
-  rsoc::run1simulationwithfile(
-    folder = "rsoc"
-      , supfile = "sim_test.sup" 
-      , seed = seed
+## Age distribution of relatives
+
+How old are Ego's relatives? Using the `kin` data frame, we can visualize the age distribution of Ego's relatives throughout Ego's life. 
+As an example, let's pick three points of Ego's life: when she's born (age=0) at the end of her reproductive life (age=50) and when she retires (age=65).
+
+
+```r
+stable[["kins"]] %>%
+  filter(age_ego %in% c(0, 50, 65)) %>% 
+  filter(kin %in% c("m", "d", "os", "ys")) %>%
+  mutate(age_ego = as.character(age_ego)) %>% 
+  rename_kin() %>% 
+  ggplot() +
+  geom_line(aes(age_kin, count, colour = age_ego), size = 1) +
+  scale_color_discrete("Ego's age") +
+  labs(x = "Age of Ego's kin", y = "Age distribution") +
+  theme_bw() +
+  facet_wrap(~kin)
+```
+
+![](handout_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+
+## Deceased kin
+
+We have focused on living kin, but what about relatives who have died? 
+We can get the cumulative number of kin deaths experienced by an average Ego surviving to a given age by setting the parameter `living = FALSE`.
+This creates a new element `kins_death_by_age_ego` in the output value of `kins()`:
+
+
+```r
+stable_death <- 
+  kins(
+    ego_year = 1950
+    , U = swe_surv
+    , f = swe_asfr
+    , stable = TRUE
+    , living = FALSE
     )
-  
-# read output
-  # Read simulation output population
-  opop <- read.table(file="rsoc/output_pop.opop", header=F, as.is=T)  
-  
-  ## assign names to columns
-  names(opop)<-c("pid","fem","group",
-                 "nev","dob","mom","pop","nesibm","nesibp",
-                 "lborn","marid","mstat","dod","fmult")
-  
-  opop <- 
-    opop %>% 
-    # Transform to years
-    mutate(
-      birth_year = dob/12
-      , death_year = dod/12
-    ) %>% 
-    select(pid, mom, pop, fem, birth_year, death_year) %>% 
-    filter(!is.na(mom))
+```
 
-  m1_soc <- 
-    left_join(
-      opop %>% 
-        filter(mom != 0) %>% 
-        filter(birth_year >= 50) %>% 
-        select(ego = pid, mom, ego_dob = birth_year)
-      , opop %>% 
-        select(mom = pid, mom_dod = death_year)
-    ) %>% 
-    mutate(ego_age_mom_death = mom_dod - ego_dob) %>% 
-    filter(ego_age_mom_death > 0) %>% 
-    count(age = ego_age_mom_death) %>% 
-    arrange(age) %>% 
-    mutate(count = 1 - cumsum(n)/sum(n)) %>% 
-    select(age, count) %>% 
-    mutate(source = "socsim") %>% 
-    mutate(seed = seed)
-  
-  m1_soc
-}
+For this example, we combine all kin types to show the cumulative burden of kin death for an average member of the population surviving to each age:
 
-m1_soc_sims <- 
-  lapply(sample(1:1000, 5), run_random_simulation) %>% 
-  bind_rows()
 
-m1_soc_sims %>% 
-  ggplot(aes(x = age, y = count, colour = seed)) +
-  geom_line() +
-  labs(x = "Ego's age", y = "Probability that mother is alive") +
+```r
+stable_death$kins_alive_death %>%
+  filter(alive =="no") %>%
+  group_by(age_ego) %>% 
+  summarise(total_cum = sum(total_cum)) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total_cum), size = 1)  +
+  labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
   theme_bw()
 ```
+
+![](handout_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+
+# Example 2: population with changing rates
+
+In the real world, the population is Sweden is not stable.
+Individuals in it experience changing mortality and fertility rates throughout their life.
+Kinship structures in populations with changing rates can be computed following Caswell [-@caswell_formal_2021].
+
+All the outputs that we showed for stable populations are also available for non-stable populations. 
+In this section we'll focus on outputs that are specific to time-varying kinship structures. 
+In particular, we'll reproduce Figure 5 from Caswell [-@caswell_formal_2021] to show period, cohort, and age results in Sweden. 
+
+Note that, in order to do this, we use a different set of input rates, which are also pre-loaded with DemoKin. 
+
+
+```r
+data(package="DemoKin")
+```
+
+
+|Item             |Title |
+|:----------------|:-----|
+|U (swe_caswell)  |      |
+|f (swe_caswell)  |      |
+|pi (swe_caswell) |      |
+
+## Cohort perspective
+
+For a cohort perspective, we run the `kins()` function with the `stable = FALSE` parameter and with a vector of `ego_year` values:
+  
+
+```r
+system.time(
+  swe_coh <- 
+    kins(
+      U = U
+      , f = f
+      , pi = pi
+      , stable = F
+      , birth_female = 1
+      # Note that we use the 'ego_cohort' parametersa as input
+      , ego_cohort = c(1891,1911,1931,1951,1971,2011,2041)
+      # We're only interested in certain kin ties
+      , selected_kins = c("d","gd","ggd","m","gm","ggm")
+    )
+)
+```
+
+```
+##    user  system elapsed 
+##   75.01    0.40   76.24
+```
+
+Show, in a Keyfitz diagram, the expected kin count for an average woman aged 35 and born in 1951 Sweden in a non-stable population:
+  
+
+```r
+swe_coh$kins_by_age_ego %>% 
+  filter(cohort == 1951, age_ego == 35) %>% 
+  select(kin, total) %>% 
+  plot_diagram()
+```
+
+```{=html}
+<div id="htmlwidget-804db584fd60bb351ecf" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-804db584fd60bb351ecf">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0.001)\n  GGM ==> GM(gm: <br>0.221)\n  GM  --> AOM(oa: <br>)\n  GM  ==> M(m: <br>0.896)\n  GM  --> AYM(ya: <br>)\n  AOM  --> CAOM(coa: <br>)\n  M   --> OS(os: <br>)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>)\n  AYM  --> CAYM(cya: <br>)\n  OS   --> NOS(nos: <br>)\n  E   ==> D(d: <br>0.908)\n  YS   --> NYS(nys: <br>)\n  D   ==> GD(gd: <br>0.001)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+```
+
+Finally, we show the expected number of ascendants and descendants by Ego's birth cohort in any given year:
+
+
+```r
+swe_coh$kins_by_age_ego %>%
+  rename_kin() %>% 
+  mutate(cohort = factor(cohort)) %>% 
+  ggplot(aes(year,total,color=cohort)) +
+  scale_y_continuous(labels = seq(0,3,.2),breaks = seq(0,3,.2))+
+  geom_line(size=1)+
+  geom_vline(xintercept = 2019, linetype=2)+
+  facet_wrap(~kin,scales = "free")+
+  labs(x = "Year", "Kin count") + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+![](handout_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+
+## Period perspective
+
+For a **period perspective**, we re-run the `kins()` function, this time with a vector of `ego_year` values:
+
+
+```r
+system.time(
+swe_period <- 
+  kins(
+    U = U
+    , f = f
+    , pi = pi
+    , stable = F
+    , birth_female = 1
+    # Note that we use the 'ego_year' parametersa as input
+    , ego_year = c(1891,1921,1951,2010,2050,2080,2120)
+    # We're only interested in certain kin ties
+, selected_kins = c("d","gd","ggd","m","gm","ggm","os","ys","oa","ya")
+)
+)
+```
+
+```
+##    user  system elapsed 
+##   50.29    0.11   50.79
+```
+
+Now, we plot the expected values by Ego's age at different time-points:
+
+
+```r
+swe_period$kins_by_age_ego %>%
+  rename_kin() %>% 
+  mutate(year = factor(year)) %>% 
+  ggplot(aes(age_ego,total,color=year)) +
+  geom_line(size=1)+
+  facet_wrap(~kin, scales = "free")+
+  labs(x = "Ego's age", "Kin count") + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+![](handout_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+
+# In the pipeline
+
+1. Implement multi-stage [@caswell_formal_2020] and two-sex models [@caswell2021formal_two-sex]
+1. Improve Keyfitz kinship diagrams
+1. Create a *Human Kinship Database*?
+
+<!-- 1. Functions to transform common demographic data sources (HMD, HFD, UNWPP) to DemoKin input -->
+  
+# Get involved!
+  
+`DemoKin` is giving its first steps.
+Please contact us via email, or create an issue or submit a pull request on GitHub if you have any suggestion: 
+  
+- https://github.com/IvanWilli/DemoKin
+- ivanwilliams1985[at]gmail.com
+- alburezgutierrez[at]demogr.mpg.de
+
+# Citation
+
+Williams, Iván, Alburez-Gutierrez, Diego and Xi Song. (2021) "DemoKin: An R package to compute kinship networks in stable and non-stable populations." URL: <https://github.com/IvanWilli/DemoKin>.
 
 ## References
