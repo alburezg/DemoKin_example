@@ -16,20 +16,27 @@ output:
     toc_depth: 2
 ---
 
-<style type="text/css">
-  body{
-  font-size: 12pt;
-}
-</style>
+<!-- <style type="text/css"> -->
+<!--   body{ -->
+<!--   font-size: 12pt; -->
+<!-- } -->
+<!-- </style> -->
 
 
 
 > **Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.**
 
-# The DemoKin package
+
+# The `DemoKin` package
 
 `DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. 
 The package is an R-language implementation of Caswell [-@caswell_formal_2019;-@caswell_formal_2021] and draws on previous theoretical development by Goodman, Keyfitz and Pullum [-@goodman_family_1974]. 
+
+Kin count estimation has a long history in mathematical demography, starting with the work of [@lotka1931orphanhood] on modelling orphanhood in theoretical populations across demographic regimes.
+To the best of our knowledge, Brass [-@brass_derivation_1953] proposed the first kinship equation to estimate child survival over maternal age. 
+Goodman et. al [-@goodman_family_1974] generalized this approach to sisters, granddaughters, cousins, etc., in stable and non-stable populations.
+The so-called Goodman-Keyfitz-Pullum Kinship Equations were popularized by Keyfitz and Caswell [-@Keyfitz2005] and Bongaarts [-@bongaarts_projection_1987] used a similar approach to estimate descendants in his 'Family Status Model'.
+More recently, Caswell [-@caswell_formal_2019;-@caswell_formal_2021] introduce the matrix approach that `DemoKin` is based on.
 
 ## Installation
 
@@ -119,8 +126,9 @@ data(package="DemoKin")
 
 The in-built data sets are:
 
-- **swe_surv** matrix; survival ratio by age (DemoKin's *U* argument)
+### `swe_surv` matrix; survival ratio by age (DemoKin's *U* argument)
 
+The [appendix](#appendix) shows how to obtain these survival matrices from standard life tables. 
 This is what the data looks like:
 
 
@@ -151,9 +159,9 @@ image.plot(
   )
 ```
 
-![](handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-- **swe_asfr** matrix; age specific fertility rate (DemoKin's *f* argument)
+### `swe_asfr` matrix; age specific fertility rate (DemoKin's *f* argument)
 
 This is what the data looks like:
 
@@ -183,9 +191,9 @@ image.plot(
   )
 ```
 
-![](handout_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
-- **swe_pop** matrix; population by age (Demokin's *N* argument)
+### `swe_pop` matrix; population by age (Demokin's *N* argument)
 
 This is what the data looks like:
 
@@ -217,32 +225,15 @@ image.plot(
   )
 ```
 
-![](handout_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ## Value
 
 `DemoKin::kins()` returns a list with two elements.
 
-- **kins_by_age_ego** is a data frame of ...
+### `kins` 
 
-
-```r
-head(stable$kins_by_age_ego)
-```
-
-```
-## # A tibble: 6 x 7
-##    year cohort age_ego kin   total mean_age sd_age
-##   <dbl>  <dbl>   <int> <chr> <dbl>    <dbl>  <dbl>
-## 1     0      0       0 coa   0.402    10.2    7.42
-## 2     0      0       0 cya   0.134     5.04   4.42
-## 3     0      0       0 d     0       NaN    NaN   
-## 4     0      0       0 gd    0       NaN    NaN   
-## 5     0      0       0 ggd   0       NaN    NaN   
-## 6     0      0       0 ggm   0.327    73.9    7.17
-```
-
-- **kins** is a data frame of ...
+This data rame contains the full results, giving the expected kin counts by year or cohort and age of Ego and age of kin. 
 
 
 ```r
@@ -258,6 +249,41 @@ head(stable$kins)
 ## 5   d       4   yes       0     0      0    0
 ## 6   d       5   yes       0     0      0    0
 ```
+
+### `kins_by_age_ego`
+
+This is a 'summary' data frame derived from `kins`. To produce it, you sum over all ages of kin to produce a data frame of expected kin counts by year or cohort and age of Ego (but *not* by age of kin). 
+This is how the `kins_by_age_ego` object is derived:
+
+
+```r
+kins_by_age_ego <- 
+  stable$kins %>% 
+  select(year, cohort, kin, age_ego, age_kin, count) %>% 
+  group_by(year, cohort, kin, age_ego) %>% 
+  summarise(total = sum(count)) %>% 
+  ungroup()
+```
+
+```
+## `summarise()` has grouped output by 'year', 'cohort', 'kin'. You can override using the `.groups` argument.
+```
+
+```r
+# Check that they are identical
+
+kins_by_age_ego %>% 
+  identical(
+    stable$kins_by_age_ego %>% 
+      select(year, cohort, kin, age_ego, total) %>% 
+      arrange(year, cohort, kin, age_ego)
+  )
+```
+
+```
+## [1] TRUE
+```
+
 
 We'll see what these means in the examples below.
 
@@ -287,7 +313,7 @@ system.time(
 
 ```
 ##    user  system elapsed 
-##    0.73    0.03    0.77
+##    1.09    0.05    1.19
 ```
 
 ## 'Keyfitz' kinship diagram
@@ -303,8 +329,8 @@ stable$kins_by_age_ego %>%
 ```
 
 ```{=html}
-<div id="htmlwidget-5fcfac3770ded1c7910f" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5fcfac3770ded1c7910f">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0d25087bdcd7738873df" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0d25087bdcd7738873df">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 
@@ -335,11 +361,11 @@ stable$kins_by_age_ego %>%
   facet_wrap(~kin)
 ```
 
-![](handout_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 It's a bit too much information in one graph. Let's pick it appart by considering different kin types in isolation. 
 
-- **Living ancestors**
+### Living ancestors
 
 
 ```r
@@ -352,9 +378,9 @@ stable$kins_by_age_ego %>%
   labs(x = "Ego's age", y = "Expected number of surviving kin")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
-- **Living descendants**
+### Living descendants
 
 
 ```r
@@ -367,9 +393,9 @@ stable$kins_by_age_ego %>%
   labs(x = "Ego's age", y = "Expected number of surviving kin")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
-- **Other kin**
+### Other kin
 
 
 ```r
@@ -382,16 +408,21 @@ stable$kins_by_age_ego %>%
   labs(x = "Ego's age", y = "Expected number of surviving kin")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
-- **Family size**: How does overall family size (and family composition) vary over life for an average woman who survives to each age?
+### Family size
+
+How does overall family size (and family composition) vary over life for an average woman who survives to each age?
 
 
 ```r
-stable$kins_by_age_ego %>%
+counts <- 
+  stable$kins_by_age_ego %>%
   group_by(age_ego) %>% 
   summarise(total = sum(total)) %>% 
-  ungroup() %>% 
+  ungroup()
+
+counts %>% 
   ggplot() +
   geom_line(aes(age_ego, total), size = 1)  +
   coord_cartesian(ylim = c(0, 6)) + 
@@ -399,7 +430,7 @@ stable$kins_by_age_ego %>%
   labs(x = "Ego's age", y = "Number of living female relatives")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 We can decompose this by relative type:
 
@@ -423,8 +454,9 @@ stable$kins_by_age_ego %>%
   ungroup() %>% 
   # Rename by hand
   mutate(kin = relatives_small[kin]) %>% 
-  ggplot() +
-  geom_area(aes(x = age_ego, y = total, fill = kin)) +
+  ggplot(aes(x = age_ego, y = total)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = counts, size = 2) +
   labs(x = "Ego's age", y = "Number of living female relatives") +
   coord_cartesian(ylim = c(0, 6)) + 
   theme_bw() +
@@ -435,7 +467,7 @@ stable$kins_by_age_ego %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](handout_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 ## Deceased kin
 
@@ -455,23 +487,79 @@ stable_death <-
     )
 ```
 
-For this example, we combine all kin types to show the cumulative burden of kin death for an average member of the population surviving to each age:
+### Non-cumulative counts of kin deaths experienced by Ego
+
+We start by considering the number of kin deaths that an average can expect to experience at each age. In other words, the non-cumulative number of deaths in the family that Ego experiences at a given age.  
+
+
+```r
+loss1 <- 
+  stable_death$kins_alive_death %>%
+  filter(alive =="no", age_ego>0) %>%
+  group_by(age_ego) %>% 
+  summarise(total = sum(total)) %>% 
+  ungroup()
+
+loss1 %>% 
+  ggplot() +
+  geom_line(aes(age_ego, total), size = 1)  +
+  labs(x = "Ego's age", y = "Number of kin deaths experienced (non-cumulative)") +
+  theme_bw()
+```
+
+![](DemoKin_handout_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+
+How are these deaths distributed by type of relative? 
+We can decompose this by kin type:
 
 
 ```r
 stable_death$kins_alive_death %>%
+  filter(alive =="no", age_ego>0) %>%
+  # Consolidate kin types
+  mutate(kin = consolidate[kin]) %>% 
+  group_by(age_ego, kin) %>% 
+  summarise(total = sum(total)) %>% 
+  ungroup() %>% 
+  # Rename by hand
+  mutate(kin = relatives_small[kin]) %>% 
+  ggplot(aes(x = age_ego, y = total)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = loss1, size = 2) +
+  labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+```
+## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
+```
+
+![](DemoKin_handout_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+
+### Cumulative number of kin deaths
+
+Now, we combine all kin types to show the cumulative burden of kin death for an average member of the population surviving to each age:
+
+
+```r
+loss2 <- 
+  stable_death$kins_alive_death %>%
   filter(alive =="no") %>%
   group_by(age_ego) %>% 
-  summarise(total_cum = sum(total_cum)) %>% 
-  ungroup() %>% 
+  summarise(total = sum(total_cum)) %>% 
+  ungroup()
+
+loss2 %>% 
   ggplot() +
-  geom_line(aes(age_ego, total_cum), size = 1)  +
+  geom_line(aes(age_ego, total), size = 1)  +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
   theme_bw()
 ```
 
-![](handout_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
 
+An member of the population aged 15, 50, and 65yo will have experienced, on average, the death of 0.6, 2.6, 3.7 relatives, respectively. 
 We can decompose this by relative type:
 
 
@@ -485,8 +573,9 @@ stable_death$kins_alive_death %>%
   ungroup() %>% 
   # Rename by hand
   mutate(kin = relatives_small[kin]) %>% 
-  ggplot() +
-  geom_area(aes(x = age_ego, y = total, fill = kin)) +
+  ggplot(aes(x = age_ego, y = total)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = loss2, size = 2) +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
   theme_bw() +
   theme(legend.position = "bottom")
@@ -496,7 +585,7 @@ stable_death$kins_alive_death %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](handout_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
 
 ## Age distribution of relatives
 
@@ -518,7 +607,7 @@ stable[["kins"]] %>%
   facet_wrap(~kin)
 ```
 
-![](handout_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
 The output of the `DemoKin::kins()` function can also be used to easily determine the mean age Ego's relatives by kin type. 
 For simplicity, let's focus on an Ego aged 35 yo and get the mean age (and standard deviation) of her relatives in our stable population. 
@@ -554,7 +643,9 @@ All the outputs that we showed for stable populations in the previous section ar
 In this section we'll focus on outputs that are specific to time-varying kinship structures. 
 In particular, we'll show period, cohort, and age results for Sweden (Figure 5 from Caswell [-@caswell_formal_2021]). 
 
-Note that, in order to arrive a this results, we use a different set of input rates, which are also pre-loaded with DemoKin. 
+Note that, in order to arrive a this results, we use a different set of input values. 
+The objects `U`, `f`, and `pi` were extracted by Ivan from the supplementary materials provided by Caswell [-@caswell_formal_2021].
+They are included in DemoKin by default. 
 
 
 ```r
@@ -583,7 +674,7 @@ system.time(
       , stable = F
       , birth_female = 1
       # Note that we use the 'ego_cohort' parametersa as input
-      , ego_cohort = c(1891,1911,1931,1951,1971,2011,2041)
+      , ego_cohort = c(1891,1931,1971,2041)
       # We're only interested in certain kin ties
       , selected_kins = c("d","gd","m","gm")
     )
@@ -592,7 +683,7 @@ system.time(
 
 ```
 ##    user  system elapsed 
-##   77.04    0.62   78.77
+##   73.00    0.37   74.19
 ```
 
 Show, in a Keyfitz diagram, the expected kin count for an average woman aged 35 and born in 1951 Sweden in a non-stable population:
@@ -600,14 +691,14 @@ Show, in a Keyfitz diagram, the expected kin count for an average woman aged 35 
 
 ```r
 swe_coh$kins_by_age_ego %>% 
-  filter(cohort == 1951, age_ego == 35) %>% 
+  filter(cohort == 1971, age_ego == 35) %>% 
   select(kin, total) %>% 
   plot_diagram()
 ```
 
 ```{=html}
-<div id="htmlwidget-2e7d82491b2d10c8be08" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2e7d82491b2d10c8be08">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>)\n  GGM ==> GM(gm: <br>0.221)\n  GM  --> AOM(oa: <br>)\n  GM  ==> M(m: <br>0.896)\n  GM  --> AYM(ya: <br>)\n  AOM  --> CAOM(coa: <br>)\n  M   --> OS(os: <br>)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>)\n  AYM  --> CAYM(cya: <br>)\n  OS   --> NOS(nos: <br>)\n  E   ==> D(d: <br>0.908)\n  YS   --> NYS(nys: <br>)\n  D   ==> GD(gd: <br>0.001)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-14c41829177d3e251bcf" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-14c41829177d3e251bcf">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>)\n  GGM ==> GM(gm: <br>0.38)\n  GM  --> AOM(oa: <br>)\n  GM  ==> M(m: <br>0.935)\n  GM  --> AYM(ya: <br>)\n  AOM  --> CAOM(coa: <br>)\n  M   --> OS(os: <br>)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>)\n  AYM  --> CAYM(cya: <br>)\n  OS   --> NOS(nos: <br>)\n  E   ==> D(d: <br>0.846)\n  YS   --> NYS(nys: <br>)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 Finally, we show the expected number of ascendants and descendants by Ego's birth cohort in any given year:
@@ -627,11 +718,13 @@ swe_coh$kins_by_age_ego %>%
   theme(legend.position = "bottom")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
 
 ## Period perspective
 
 For a **period perspective**, we re-run the `kins()` function, this time with a vector of `ego_year` values:
+
+Note that 
 
 
 ```r
@@ -644,7 +737,7 @@ swe_period <-
     , stable = F
     , birth_female = 1
     # Note that we use the 'ego_year' parametersa as input
-    , ego_year = c(1891,1921,1951,2010,2050,2080,2120)
+    , ego_year = c(1891,1951,2050,2120)
     # We're only interested in certain kin ties
 , selected_kins = c("d","gd","m","gm","os","ys")
 )
@@ -653,7 +746,7 @@ swe_period <-
 
 ```
 ##    user  system elapsed 
-##   58.70    0.17   61.67
+##   52.89    0.13   54.70
 ```
 
 Now, we plot the expected values by Ego's age at different time-points:
@@ -671,14 +764,14 @@ swe_period$kins_by_age_ego %>%
   theme(legend.position = "bottom")
 ```
 
-![](handout_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
+![](DemoKin_handout_files/figure-html/unnamed-chunk-36-1.png)<!-- -->
 
 # In the pipeline
 
-1. Hex logo
+1. Hex logo for package
 1. Implement multi-stage [@caswell_formal_2020] and two-sex models [@caswell2021formal_two-sex]
 1. Improve Keyfitz kinship diagrams
-1. Create a *Human Kinship Database*?
+1. Improve documentation and vignette of package 
 
 <!-- 1. Functions to transform common demographic data sources (HMD, HFD, UNWPP) to DemoKin input -->
   
@@ -691,6 +784,7 @@ You can also get in touch directly:
 - Ivan: 
     + ivanwilliams1985[at]gmail.com
     + https://twitter.com/ivanchowilliams
+    + https://github.com/IvanWilli
 - Diego
     + alburezgutierrez[at]demogr.mpg.de
     + https://twitter.com/d_alburez
@@ -700,20 +794,12 @@ You can also get in touch directly:
 
 Williams, Iván, Alburez-Gutierrez, Diego and Xi Song. (2021) "DemoKin: An R package to compute kinship networks in stable and non-stable populations." URL: <https://github.com/IvanWilli/DemoKin>.
 
-# Aknowledgments
 
-Kin count estimation has a long history in mathematical demography, starting with the work of [@lotka1931orphanhood] on modelling orphanhood in theoretical populations across demographic regimes.
-To the best of our knowledge, Brass [-@brass_derivation_1953] proposed the first kinship equation to estimate child survival over maternal age. 
-Goodman et. al [-@goodman_family_1974] generalized this approach to sisters, granddaughters, cousins, etc., in stable and non-stable populations.
-The so-called Goodman-Keyfitz-Pullum Kinship Equations were popularized by Keyfitz and Caswell [-@Keyfitz2005] and Bongaarts [-@bongaarts_projection_1987] used a similar approach to estimate descendants in his 'Family Status Model'.
-More recently, Caswell [-@caswell_formal_2019;-@caswell_formal_2021] introduce the matrix approach that `DemoKin` is based on.
-
-# References
-
-# Appendix: Obtaining U matrix from a life table
+# Appendix: Obtaining U matrix from a life table {#appendix}
 
 Here, we show how to estimate the argument **U** from `DemoKin::kins()` (survival ratio by age from a life table) from a standard life table.
-In this case, we are using Swedish period life tables from the Human Mortality Database. 
+The code is part of the function `DemoKin::get_HMDHFD()`.
+For this example, we use Swedish period life tables from the Human Mortality Database. 
 
 
 ```r
@@ -754,3 +840,54 @@ U[1:4, 1:4]
 ## 2 0.9662034 0.9679407 0.9606561 0.9650853
 ## 3 0.9737870 0.9734861 0.9685377 0.9726419
 ```
+
+# Session Information
+
+
+```r
+sessionInfo()
+```
+
+```
+## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19044)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United Kingdom.1252 
+## [2] LC_CTYPE=English_United Kingdom.1252   
+## [3] LC_MONETARY=English_United Kingdom.1252
+## [4] LC_NUMERIC=C                           
+## [5] LC_TIME=English_United Kingdom.1252    
+## 
+## attached base packages:
+## [1] grid      stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
+## 
+## other attached packages:
+##  [1] fields_11.6        spam_2.6-0         dotCall64_1.0-1    knitr_1.31        
+##  [5] forcats_0.5.1      stringr_1.4.0      dplyr_1.0.5        purrr_0.3.4       
+##  [9] readr_1.4.0        tidyr_1.1.3        tibble_3.1.0       ggplot2_3.3.3     
+## [13] tidyverse_1.3.0    DemoKin_0.0.0.9000
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.7         lubridate_1.7.10   visNetwork_2.0.9   assertthat_0.2.1  
+##  [5] digest_0.6.28      utf8_1.2.1         R6_2.5.0           cellranger_1.1.0  
+##  [9] backports_1.2.1    reprex_1.0.0       evaluate_0.14      highr_0.8         
+## [13] httr_1.4.2         pillar_1.5.1       rlang_0.4.10       readxl_1.3.1      
+## [17] rstudioapi_0.13    jquerylib_0.1.4    rmarkdown_2.7      DiagrammeR_1.0.6.1
+## [21] labeling_0.4.2     htmlwidgets_1.5.3  munsell_0.5.0      broom_0.7.5       
+## [25] compiler_4.0.2     modelr_0.1.8       xfun_0.21          pkgconfig_2.0.3   
+## [29] htmltools_0.5.1.1  tidyselect_1.1.0   bookdown_0.21      fansi_0.4.2       
+## [33] crayon_1.4.1       dbplyr_2.1.0       withr_2.4.1        jsonlite_1.7.2    
+## [37] gtable_0.3.0       lifecycle_1.0.0    DBI_1.1.1          magrittr_2.0.1    
+## [41] scales_1.1.1       cli_2.3.1          stringi_1.5.3      farver_2.1.0      
+## [45] fs_1.5.0           xml2_1.3.2         bslib_0.2.5        ellipsis_0.3.1    
+## [49] generics_0.1.0     vctrs_0.3.7        RColorBrewer_1.1-2 tools_4.0.2       
+## [53] glue_1.4.2         maps_3.3.0         hms_1.0.0          yaml_2.2.1        
+## [57] colorspace_2.0-0   rvest_1.0.0        haven_2.3.1        sass_0.4.0
+```
+
+# References
