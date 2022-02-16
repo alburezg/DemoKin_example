@@ -26,7 +26,7 @@ library(knitr)
 library(fields)
 ```
 
-> **Get the `Rmd` version of this file: https://github.com/alburezg/kinship_formal_demo.**
+> **Get the `Rmd` version of this file: https://github.com/alburezg/DemoKin_example**
 
 
 # The `DemoKin` package
