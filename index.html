@@ -3276,7 +3276,7 @@ system.time(
     )
 )</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.64    0.05    0.68</code></pre>
+##    1.14    0.07    1.28</code></pre>
 <div id="keyfitz-kinship-diagram" class="section level2">
 <h2><span class="header-section-number">2.1</span> ‘Keyfitz’ kinship diagram</h2>
 <p>We can visualize the implied kin counts for an Ego aged 35 yo in a stable population using a network or ‘Keyfitz’ kinship diagram <span class="citation">(Keyfitz and Caswell 2005)</span> using the <code>plot_diagram</code> function:</p>
@@ -3284,8 +3284,8 @@ system.time(
   filter(age_ego == 35) %&gt;% 
   select(kin, count) %&gt;% 
   plot_diagram()</code></pre>
-<div id="htmlwidget-fd85053bba450d47e6c9" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-fd85053bba450d47e6c9">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-909d1496884d60d9bcd1" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-909d1496884d60d9bcd1">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="expected-kin-counts-for-an-ego-surviving-to-each-age" class="section level2">
 <h2><span class="header-section-number">2.2</span> Expected kin counts for an Ego surviving to each age</h2>
@@ -3543,7 +3543,7 @@ swe_period &lt;-
 )</code></pre>
 <pre><code>## Assuming stable population before 1891.</code></pre>
 <pre><code>##    user  system elapsed 
-##   56.63    0.37   57.59</code></pre>
+##   61.72    0.61   63.83</code></pre>
 <p>Now, we plot the expected number of daughters that Ego throughout her life at different points in time:</p>
 <pre class="r"><code>swe_period$kin_summary %&gt;%
   filter(kin == &quot;d&quot;) %&gt;% 
@@ -3592,7 +3592,7 @@ We could as, for example:</p>
 )</code></pre>
 <pre><code>## Assuming stable population before 1891.</code></pre>
 <pre><code>##    user  system elapsed 
-##   74.59    0.10   75.09</code></pre>
+##   70.21    0.06   70.69</code></pre>
 <p>Now, we can show the expected number of daughters that women born in different cohorts have at their disposal in any given year:</p>
 <pre class="r"><code>swe_coh$kin_summary %&gt;%
   filter(kin == &quot;d&quot;) %&gt;% 

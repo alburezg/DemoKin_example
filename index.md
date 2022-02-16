@@ -155,7 +155,7 @@ image.plot(
   )
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 ### `swe_asfr` matrix; age specific fertility rate (DemoKin's *f* argument)
 
@@ -187,7 +187,7 @@ image.plot(
   )
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ### `swe_pop` matrix; population by age (Demokin's *N* argument)
 
@@ -221,7 +221,7 @@ image.plot(
   )
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ## Value
 
@@ -306,7 +306,7 @@ system.time(
 
 ```
 ##    user  system elapsed 
-##    0.64    0.05    0.68
+##    1.14    0.07    1.28
 ```
 
 ## 'Keyfitz' kinship diagram
@@ -322,8 +322,8 @@ stable$kin_summary %>%
 ```
 
 ```{=html}
-<div id="htmlwidget-fd85053bba450d47e6c9" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-fd85053bba450d47e6c9">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-909d1496884d60d9bcd1" style="width:1152px;height:960px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-909d1496884d60d9bcd1">{"x":{"diagram":"graph TD\n\n  GGM(ggm: <br>0)\n  GGM ==> GM(gm: <br>0.138)\n  GM  --> AOM(oa: <br>0.352)\n  GM  ==> M(m: <br>0.824)\n  GM  --> AYM(ya: <br>0.519)\n  AOM  --> CAOM(coa: <br>0.545)\n  M   --> OS(os: <br>0.502)\n  M   ==> E((Ego))\n  M   --> YS(ys: <br>0.575)\n  AYM  --> CAYM(cya: <br>0.624)\n  OS   --> NOS(nos: <br>0.536)\n  E   ==> D(d: <br>0.928)\n  YS   --> NYS(nys: <br>0.31)\n  D   ==> GD(gd: <br>0)\n  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;\n  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;\n  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center\n  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center\n  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center\n  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"},"evals":[],"jsHooks":[]}</script>
 ```
 
 
@@ -383,7 +383,7 @@ stable$kin_summary %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 ### Family size
 
@@ -405,7 +405,7 @@ counts %>%
   labs(x = "Ego's age", y = "Number of living female relatives")
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 We can decompose this by relative type:
 
@@ -427,7 +427,7 @@ stable$kin_summary %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 ## Deceased kin
 
@@ -467,7 +467,7 @@ loss1 %>%
   theme_bw()
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 How are these deaths distributed by type of relative? 
 We can decompose this by kin type:
@@ -493,7 +493,7 @@ stable_death$kin %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 ### Cumulative number of kin deaths
 
@@ -515,7 +515,7 @@ loss2 %>%
   theme_bw()
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 An member of the population aged 15, 50, and 65yo will have experienced, on average, the death of 0.6, 2.6, 3.7 relatives, respectively. 
 We can decompose this by relative type:
@@ -541,7 +541,7 @@ stable_death$kin_summary %>%
 ## `summarise()` has grouped output by 'age_ego'. You can override using the `.groups` argument.
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 ## Age distribution of relatives
 
@@ -563,7 +563,7 @@ stable$kin_full %>%
   facet_wrap(~kin)
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
 
 The output of the `DemoKin::kin()` function can also be used to easily determine the mean age Ego's relatives by kin type. 
 For simplicity, let's focus on an Ego aged 35 yo and get the mean age (and standard deviation) of her relatives in our stable population. 
@@ -649,7 +649,7 @@ swe_period <-
 
 ```
 ##    user  system elapsed 
-##   56.63    0.37   57.59
+##   61.72    0.61   63.83
 ```
 
 Now, we plot the expected number of daughters that Ego throughout her life at different points in time:
@@ -667,7 +667,7 @@ swe_period$kin_summary %>%
   theme(legend.position = "bottom")
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
 In a similar way, we can ask, how many grand-daughters, sisters, etc., would an average woman have at different points in time?
 
@@ -684,7 +684,7 @@ swe_period$kin_summary %>%
   theme(legend.position = "bottom")
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
 
 ## Cohort perspective
 
@@ -720,7 +720,7 @@ system.time(
 
 ```
 ##    user  system elapsed 
-##   74.59    0.10   75.09
+##   70.21    0.06   70.69
 ```
 
 Now, we can show the expected number of daughters that women born in different cohorts have at their disposal in any given year:
@@ -739,7 +739,7 @@ swe_coh$kin_summary %>%
   theme(legend.position = "bottom")
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
 
 We can do the same thing for other kin types to show the expected number of kin for women born in a given cohort across time:
 
@@ -757,7 +757,7 @@ swe_coh$kin_summary %>%
   theme(legend.position = "bottom")
 ```
 
-![](DemoKin_handout_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
+![](index_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
 
 # In the pipeline
 
