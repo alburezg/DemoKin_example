@@ -16,16 +16,8 @@ output:
     toc_depth: 2
 ---
 
-<!-- <style type="text/css"> -->
-<!--   body{ -->
-<!--   font-size: 12pt; -->
-<!-- } -->
-<!-- </style> -->
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-source("functions.R")
 
 # Install packages if needed
 library(DemoKin)
@@ -42,7 +34,7 @@ library(fields)
 `DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. 
 The package is an R-language implementation of Caswell [-@caswell_formal_2019;-@caswell_formal_2021] and draws on previous theoretical development by Goodman, Keyfitz and Pullum [-@goodman_family_1974]. 
 
-Kin count estimation has a long history in mathematical demography, starting with the work of [@lotka1931orphanhood] on modelling orphanhood in theoretical populations across demographic regimes.
+Kin count estimation has a long history in mathematical demography, starting with the work of [@lotka1931orphanhood] on modeling orphanhood in theoretical populations across demographic regimes.
 To the best of our knowledge, Brass [-@brass_derivation_1953] proposed the first kinship equation to estimate child survival over maternal age. 
 Goodman et. al [-@goodman_family_1974] generalized this approach to sisters, granddaughters, cousins, etc., in stable and non-stable populations.
 The so-called Goodman-Keyfitz-Pullum Kinship Equations were popularized by Keyfitz and Caswell [-@Keyfitz2005] and Bongaarts [-@bongaarts_projection_1987] used a similar approach to estimate descendants in his 'Family Status Model'.
@@ -55,23 +47,25 @@ You can install the development version from GitHub with:
 ```{r, eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("IvanWilli/DemoKin")
+# devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)
 ```
 
-## The function `kins()`
+## The function `kin()`
 
-`DemoKin::kins()` currently does most of the heavy lifting in terms of implementing matrix kinship models. 
+`DemoKin::kin()` currently does most of the heavy lifting in terms of implementing matrix kinship models. 
 This is what it looks like in action, in this case assuming demographic stability:
 
 ```{r}
 library(DemoKin)
+library(tidyverse)
 
 stable <- 
-  kins(
+  kin(
     U = swe_surv
     , f = swe_asfr
     , stable = TRUE
     , ego_year = 1950
-    , selected_kins = NULL
+    , selected_kin = NULL
     , living = TRUE
     )
 ```
@@ -86,14 +80,14 @@ stable <-
 - **ego_cohort** string; birth cohorts of interest
 - **pi** matrix; distribution of ages of mothers (see Caswell [@-caswell_formal_2019])
 - **birth_female** numeric; proportion of births that are female
-- **selected_kins** string; relatives to compute. If `NULL`, return values for all relatives
+- **selected_kin** string; relatives to compute. If `NULL`, return values for all relatives
 - **living** logical; whether to compute values for living or deceased relatives 
 
 Note that `DemoKin` only requires period demographic rate data as input!
 
 ### Details
 
-Relatives for the `selected_kins` argument are identified by a unique code:
+Relatives for the `selected_kin` argument are identified by a unique code:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 
@@ -129,6 +123,8 @@ data(package="DemoKin")
 ```
 
 ```{r, echo=FALSE}
+library(knitr)
+
 data(package="DemoKin")$results[4:6,3:4] %>% 
   data.frame() %>% 
   kable()
@@ -195,48 +191,45 @@ image.plot(
   , y = 0:nrow(swe_pop)
   , z = t(as.matrix(swe_pop))
   , xlab = "Year"
-  , ylab = "Population totals by age (N)"
+  , ylab = "Population counts by age (N)"
   )
 ```
 
 ## Value
 
-`DemoKin::kins()` returns a list with two elements.
+`DemoKin::kin()` returns a list containing two data frames: `kin_full` and `kin_summary`. 
 
-### `kins` 
+### `kin_full` 
 
-This data rame contains the full results, giving the expected kin counts by year or cohort and age of Ego and age of kin. 
+This data frame contains expected kin counts by year (or cohort), age of Ego and age of kin. 
 
 ```{r}
-head(stable$kins)
+head(stable$kin_full)
 ```
 
-### `kins_by_age_ego`
+### `kin_summary`
 
-This is a 'summary' data frame derived from `kins`. To produce it, you sum over all ages of kin to produce a data frame of expected kin counts by year or cohort and age of Ego (but *not* by age of kin). 
-This is how the `kins_by_age_ego` object is derived:
+This is a 'summary' data frame derived from `kin_full`. To produce it, we sum over all ages of kin to produce a data frame of expected kin counts by year or cohort and age of Ego (but *not* by age of kin). 
+This is how the `kin_summary` object is derived:
 
 ```{r}
-kins_by_age_ego <- 
-  stable$kins %>% 
+kin_by_age_ego <- 
+  stable$kin_full %>% 
   select(year, cohort, kin, age_ego, age_kin, count) %>% 
   group_by(year, cohort, kin, age_ego) %>% 
-  summarise(total = sum(count)) %>% 
+  summarise(count = sum(count)) %>% 
   ungroup()
 
 # Check that they are identical
 
-kins_by_age_ego %>% 
+kin_by_age_ego %>% 
   identical(
-    stable$kins_by_age_ego %>% 
-      select(year, cohort, kin, age_ego, total) %>% 
+    stable$kin_summary %>% 
+      select(year, cohort, kin, age_ego, count) %>% 
       arrange(year, cohort, kin, age_ego)
   )
 
 ```
-
-
-We'll see what these means in the examples below.
 
 # Example 1: kin counts in stable populations
 
@@ -252,7 +245,7 @@ library(DemoKin)
 
 system.time(
   stable <- 
-  kins(
+  kin(
     ego_year = 1950
     , U = swe_surv
     , f = swe_asfr
@@ -266,74 +259,61 @@ system.time(
 We can visualize the implied kin counts for an Ego aged 35 yo in a stable population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] using the `plot_diagram` function:
 
 ```{r, fig.height=10, fig.width=12}
-stable$kins_by_age_ego %>% 
+stable$kin_summary %>% 
   filter(age_ego == 35) %>% 
-  select(kin, total) %>% 
+  select(kin, count) %>% 
   plot_diagram()
 ```
 
 
 ## Expected kin counts for an Ego surviving to each age
 
-before showing the results, we define a simple function to identify relatives based on their respective codes.
-The kinship codes (e.g., "gm", "ggm") are useful for filtering the data but confusing for visualisation. 
+Before showing the results, we define a simple function to identify relatives based on their respective codes.
+The kinship codes (e.g., "gm", "ggm") are useful for filtering the data but confusing for visualization. 
 
 ```{r}
-rename_kin <- function(df){
+rename_kin <- function(df, consolidate = F){
+  
+  if(!consolidate){
+    
+    relatives <- c("Cousins from older aunt", "Cousins from younger aunt", "Daughter", "Grand-daughter", "Great-grand-daughter", "Great-grandmother", "Grandmother", "Mother", "Nieces from older sister", "Nieces from younger sister", "Aunt older than mother", "Aunt younger than mother", "Older sister", "Younger sister")
+    names(relatives) <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+    
+  } else if(consolidate){
+    
+    # Combine kin types irrespective of whether they come from older
+    # or younger sibling lines
+    consolidate <- c("c", "c", "d", "gd", "ggd", "ggm", "gm", "m", "n", "n", "a", "a", "s", "s")
+    names(consolidate) <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+    
+    # Rename kin types from codes to actual words
+    relatives <- c("Cousins", "Daughter", "Grand-daughter", "Great-grand-daughter", "Great-grandmother", "Grandmother", "Mother", "Nieces", "Aunt", "Sister")
+    names(relatives) <-  unique(consolidate)
+    
+    df <- 
+      df %>% 
+      mutate(kin = consolidate[kin]) %>%
+      group_by(age_ego, kin) %>%
+      summarise(count = sum(count)) %>% 
+      ungroup() 
+    
+  }
   df$kin <- relatives[df$kin]
-  df
+  df  
 }
 ```
 
 Now, let's visualize how the expected number of daughters, siblings, cousins, etc., changes over the lifecourse of Ego.
 
 ```{r, fig.height=6, fig.width=8}
-stable$kins_by_age_ego %>%
-  rename_kin() %>% 
+stable$kin_summary %>%
+  rename_kin(., consolidate = T) %>% 
   ggplot() +
-  geom_line(aes(age_ego, total))  +
+  geom_line(aes(age_ego, count))  +
   geom_vline(xintercept = 35, color=2)+
   theme_bw() +
   labs(x = "Ego's age") +
   facet_wrap(~kin)
-```
-
-It's a bit too much information in one graph. Let's pick it appart by considering different kin types in isolation. 
-
-### Living ancestors
-
-```{r, fig.height=6, fig.width=8}
-stable$kins_by_age_ego %>%
-  filter(kin %in% c("m", "gm", "ggm")) %>%
-  rename_kin() %>% 
-  ggplot() +
-  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving kin")
-```
-
-### Living descendants
-
-```{r, fig.height=6, fig.width=8}
-stable$kins_by_age_ego %>%
-  filter(kin %in% c("d", "gd", "ggd")) %>%
-  rename_kin() %>% 
-  ggplot() +
-  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving kin")
-```
-
-### Other kin
-
-```{r, fig.height=6, fig.width=8}
-stable$kins_by_age_ego %>%
-  filter(kin %in% c("os", "ys", "cya", "coa", "ya", "oa")) %>%
-  rename_kin() %>% 
-  ggplot() +
-  geom_line(aes(age_ego, total, colour = kin), size = 1)  +
-  theme_bw() +
-  labs(x = "Ego's age", y = "Expected number of surviving kin")
 ```
 
 ### Family size
@@ -342,14 +322,14 @@ How does overall family size (and family composition) vary over life for an aver
 
 ```{r}
 counts <- 
-  stable$kins_by_age_ego %>%
+  stable$kin_summary %>%
   group_by(age_ego) %>% 
-  summarise(total = sum(total)) %>% 
+  summarise(count = sum(count)) %>% 
   ungroup()
 
 counts %>% 
   ggplot() +
-  geom_line(aes(age_ego, total), size = 1)  +
+  geom_line(aes(age_ego, count), size = 1)  +
   coord_cartesian(ylim = c(0, 6)) + 
   theme_bw() +
   labs(x = "Ego's age", y = "Number of living female relatives")
@@ -359,25 +339,10 @@ We can decompose this by relative type:
 
 ```{r, fig.height=6, fig.width=8}
 
-# Combine kin types irrespective of whether they come from older
-# or younger sibling lines
-consolidate <- c("c", "c", "d", "gd", "ggd", "ggm", "gm", "m", "n", "n", "a", "a", "s", "s")
-names(consolidate) <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
-
-# Rename kin types from codes to actual words
-relatives_small <- c("Cousins", "Daughter", "Grand-daughter", "Great-grand-daughter", "Great-grandmother", "Grandmother", "Mother", "Nieces", "Aunt", "Sister")
-names(relatives_small) <-  unique(consolidate)
-
-stable$kins_by_age_ego %>%
-  select(age_ego, kin, total) %>% 
-  # Consolidate kin types
-  mutate(kin = consolidate[kin]) %>% 
-  group_by(age_ego, kin) %>% 
-  summarise(total = sum(total)) %>% 
-  ungroup() %>% 
-  # Rename by hand
-  mutate(kin = relatives_small[kin]) %>% 
-  ggplot(aes(x = age_ego, y = total)) +
+stable$kin_summary %>%
+  select(age_ego, kin, count) %>% 
+  rename_kin(., consolidate = T) %>% 
+  ggplot(aes(x = age_ego, y = count)) +
   geom_area(aes(fill = kin), colour = "black") +
   geom_line(data = counts, size = 2) +
   labs(x = "Ego's age", y = "Number of living female relatives") +
@@ -390,11 +355,11 @@ stable$kins_by_age_ego %>%
 
 We have focused on living kin, but what about relatives who have died? 
 We can get the cumulative number of kin deaths experienced by an average Ego surviving to a given age by setting the parameter `living = FALSE`.
-This creates a new element `kins_death_by_age_ego` in the output value of `kins()`:
+This creates a new element `kin_death_by_age_ego` in the output value of `kin()`:
 
 ```{r, fig.height=6, fig.width=8}
 stable_death <- 
-  kins(
+  kin(
     ego_year = 1950
     , U = swe_surv
     , f = swe_asfr
@@ -409,15 +374,15 @@ We start by considering the number of kin deaths that an average can expect to e
 
 ```{r}
 loss1 <- 
-  stable_death$kins_alive_death %>%
+  stable_death$kin %>%
   filter(alive =="no", age_ego>0) %>%
   group_by(age_ego) %>% 
-  summarise(total = sum(total)) %>% 
+  summarise(count = sum(count)) %>% 
   ungroup()
 
 loss1 %>% 
   ggplot() +
-  geom_line(aes(age_ego, total), size = 1)  +
+  geom_line(aes(age_ego, count), size = 1)  +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (non-cumulative)") +
   theme_bw()
 ```
@@ -426,16 +391,13 @@ How are these deaths distributed by type of relative?
 We can decompose this by kin type:
 
 ```{r}
-stable_death$kins_alive_death %>%
+stable_death$kin %>%
   filter(alive =="no", age_ego>0) %>%
-  # Consolidate kin types
-  mutate(kin = consolidate[kin]) %>% 
   group_by(age_ego, kin) %>% 
-  summarise(total = sum(total)) %>% 
+  summarise(count = sum(count)) %>% 
   ungroup() %>% 
-  # Rename by hand
-  mutate(kin = relatives_small[kin]) %>% 
-  ggplot(aes(x = age_ego, y = total)) +
+  rename_kin(., consolidate = T) %>% 
+  ggplot(aes(x = age_ego, y = count)) +
   geom_area(aes(fill = kin), colour = "black") +
   geom_line(data = loss1, size = 2) +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
@@ -449,34 +411,31 @@ Now, we combine all kin types to show the cumulative burden of kin death for an 
 
 ```{r}
 loss2 <- 
-  stable_death$kins_alive_death %>%
+  stable_death$kin_summary %>%
   filter(alive =="no") %>%
   group_by(age_ego) %>% 
-  summarise(total = sum(total_cum)) %>% 
+  summarise(count = sum(total_cum)) %>% 
   ungroup()
 
 loss2 %>% 
   ggplot() +
-  geom_line(aes(age_ego, total), size = 1)  +
+  geom_line(aes(age_ego, count), size = 1)  +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
   theme_bw()
 
 ```
 
-An member of the population aged 15, 50, and 65yo will have experienced, on average, the death of `r loss2 %>% filter(age_ego %in% c(15, 50, 65)) %>% pull(total) %>% round(1) %>% paste(., collapse = ", ")` relatives, respectively. 
+An member of the population aged 15, 50, and 65yo will have experienced, on average, the death of `r loss2 %>% filter(age_ego %in% c(15, 50, 65)) %>% pull(count) %>% round(1) %>% paste(., collapse = ", ")` relatives, respectively. 
 We can decompose this by relative type:
 
 ```{r}
-stable_death$kins_alive_death %>%
+stable_death$kin_summary %>%
   filter(alive =="no") %>%
-  # Consolidate kin types
-  mutate(kin = consolidate[kin]) %>% 
   group_by(age_ego, kin) %>% 
-  summarise(total = sum(total_cum)) %>% 
+  summarise(count = sum(total_cum)) %>% 
   ungroup() %>% 
-  # Rename by hand
-  mutate(kin = relatives_small[kin]) %>% 
-  ggplot(aes(x = age_ego, y = total)) +
+  rename_kin(., consolidate = T) %>% 
+  ggplot(aes(x = age_ego, y = count)) +
   geom_area(aes(fill = kin), colour = "black") +
   geom_line(data = loss2, size = 2) +
   labs(x = "Ego's age", y = "Number of kin deaths experienced (cumulative)") +
@@ -490,7 +449,7 @@ How old are Ego's relatives? Using the `kin` data frame, we can visualize the ag
 As an example, let's pick three points of Ego's life: when she's born (age=0) at the end of her reproductive life (age=50) and when she retires (age=65).
 
 ```{r, fig.height=6, fig.width=8}
-stable[["kins"]] %>%
+stable$kin_full %>%
   filter(age_ego %in% c(0, 50, 65)) %>% 
   filter(kin %in% c("m", "d", "os", "ys")) %>%
   mutate(age_ego = as.character(age_ego)) %>% 
@@ -503,12 +462,12 @@ stable[["kins"]] %>%
   facet_wrap(~kin)
 ```
 
-The output of the `DemoKin::kins()` function can also be used to easily determine the mean age Ego's relatives by kin type. 
+The output of the `DemoKin::kin()` function can also be used to easily determine the mean age Ego's relatives by kin type. 
 For simplicity, let's focus on an Ego aged 35 yo and get the mean age (and standard deviation) of her relatives in our stable population. 
 
 ```{r}
 ages_df <- 
-  stable$kins_by_age_ego %>% 
+  stable$kin_summary %>% 
   filter(age_ego == 35) %>% 
   select(kin, mean_age, sd_age)
 
@@ -531,14 +490,14 @@ We can say that the mothers of Ego would be, on average, `r ma` years old, with 
 # Example 2: population with changing rates
 
 The real population is Sweden is not stable: individuals in it experience changing mortality and fertility rates throughout their life.
-Kinship structures in populations with changing rates can be computed following Caswell [-@caswell_formal_2021].
+Kinship structures in populations with changing rates can be computed following Caswell and Song [-@caswell_formal_2021].
 
 All the outputs that we showed for stable populations in the previous section are also available for non-stable populations (e.g., kin counts, deceased kin, and age distributions). 
 In this section we'll focus on outputs that are specific to time-varying kinship structures. 
-In particular, we'll show period, cohort, and age results for Sweden (Figure 5 from Caswell [-@caswell_formal_2021]). 
+In particular, we'll show period, cohort, and age results for Sweden (Figure 5 from Caswell and Song [-@caswell_formal_2021]). 
 
 Note that, in order to arrive a this results, we use a different set of input values. 
-The objects `U`, `f`, and `pi` were extracted by Ivan from the supplementary materials provided by Caswell [-@caswell_formal_2021].
+The objects `U_caswell_2021`, `f_caswell_2021`, and `pi_caswell_2021` were extracted by Ivan from the supplementary materials provided by Caswell and Song [-@caswell_formal_2021].
 They are included in DemoKin by default. 
 
 ```{r}
@@ -551,87 +510,116 @@ data(package="DemoKin")$results[1:3,3:4] %>%
   kable()
 ```
 
+## Period perspective
+
+Our first illustration refers to a **period view** of kin counts. 
+Following Caswell, we consider a population that experienced the demographic rates given as input to `DemoKin` and ask:
+
+> How many living daughters would an average woman have at different ages, if we conducted a survey at a given point in time?
+
+In order to provide these results, we re-run the `kin()` function with the `stable = FALSE` parameter and the input rates from Caswell and Song [-@caswell_formal_2021].
+Note that we provide DemoKin with a vector of the period years for which we want to obtain the kin counts (i.e., in the `ego_year` argument). 
+
+```{r}
+system.time(
+swe_period <- 
+  kin(
+    U = U_caswell_2021
+    , f = f_caswell_2021
+    , pi = pi_caswell_2021
+    , stable = F
+    , birth_female = 1
+    # Note that we use the 'ego_year' parameters as input
+    , ego_year = c(1891,1951,2050,2120)
+    # We're only interested in certain kin ties
+, selected_kin = c("d","gd","m","gm","os","ys")
+)
+)
+
+```
+
+Now, we plot the expected number of daughters that Ego throughout her life at different points in time:
+
+```{r}
+swe_period$kin_summary %>%
+  filter(kin == "d") %>% 
+  rename_kin() %>% 
+  mutate(year = factor(year)) %>% 
+  ggplot(aes(age_ego,count,color=year)) +
+  geom_line(size=1)+
+  labs(x = "Ego's age", y = "Number of daughters") + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+In a similar way, we can ask, how many grand-daughters, sisters, etc., would an average woman have at different points in time?
+
+```{r}
+swe_period$kin_summary %>%
+  rename_kin() %>% 
+  mutate(year = factor(year)) %>% 
+  ggplot(aes(age_ego,count,color=year)) +
+  geom_line(size=1)+
+  facet_wrap(~kin, scales = "free")+
+  labs(x = "Ego's age", y = "Kin count") + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
 ## Cohort perspective
 
-For a cohort perspective, we run the `kins()` function with the `stable = FALSE` parameter and with a vector of `ego_year` values:
+We can also visualize the results from a **cohort perspective**. 
+This would be useful if we were interested in knowing the number of daughters of women in a given cohort at different points in time. 
+We could as, for example:
+
+> How many (living) daughters have women born in year 1951 accumulated by the year 2000, on average?
+
+For a cohort perspective, we run the `kin()` function with the `stable = FALSE` parameter and with a vector of `ego_year` values:
   
 ```{r}
 
 system.time(
   swe_coh <- 
-    kins(
-      U = U
-      , f = f
-      , pi = pi
+    kin(
+      U = U_caswell_2021
+      , f = f_caswell_2021
+      , pi = pi_caswell_2021
       , stable = F
       , birth_female = 1
-      # Note that we use the 'ego_cohort' parametersa as input
+      # Note that we use the 'ego_cohort' parameters as input
       , ego_cohort = c(1891,1931,1971,2041)
       # We're only interested in certain kin ties
-      , selected_kins = c("d","gd","m","gm")
+      , selected_kin = c("d","gd","m","gm")
     )
 )
 ```
 
-Show, in a Keyfitz diagram, the expected kin count for an average woman aged 35 and born in 1951 Sweden in a non-stable population:
-  
-```{r}
-swe_coh$kins_by_age_ego %>% 
-  filter(cohort == 1971, age_ego == 35) %>% 
-  select(kin, total) %>% 
-  plot_diagram()
-```
-
-Finally, we show the expected number of ascendants and descendants by Ego's birth cohort in any given year:
+Now, we can show the expected number of daughters that women born in different cohorts have at their disposal in any given year:
 
 ```{r}
-swe_coh$kins_by_age_ego %>%
+swe_coh$kin_summary %>%
+  filter(kin == "d") %>% 
   rename_kin() %>% 
   mutate(cohort = factor(cohort)) %>% 
-  ggplot(aes(year,total,color=cohort)) +
+  ggplot(aes(year,count,color=cohort)) +
   scale_y_continuous(labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   geom_line(size=1)+
-  geom_vline(xintercept = 2019, linetype=2)+
-  facet_wrap(~kin,scales = "free")+
-  labs(x = "Year", "Kin count") + 
+  labs(x = "Year", y = "Number of daughters") + 
   theme_bw() +
   theme(legend.position = "bottom")
 ```
 
-## Period perspective
-
-For a **period perspective**, we re-run the `kins()` function, this time with a vector of `ego_year` values:
-
-Note that 
+We can do the same thing for other kin types to show the expected number of kin for women born in a given cohort across time:
 
 ```{r}
-system.time(
-swe_period <- 
-  kins(
-    U = U
-    , f = f
-    , pi = pi
-    , stable = F
-    , birth_female = 1
-    # Note that we use the 'ego_year' parametersa as input
-    , ego_year = c(1891,1951,2050,2120)
-    # We're only interested in certain kin ties
-, selected_kins = c("d","gd","m","gm","os","ys")
-)
-)
-
-```
-
-Now, we plot the expected values by Ego's age at different time-points:
-
-```{r}
-swe_period$kins_by_age_ego %>%
+swe_coh$kin_summary %>%
   rename_kin() %>% 
-  mutate(year = factor(year)) %>% 
-  ggplot(aes(age_ego,total,color=year)) +
+  mutate(cohort = factor(cohort)) %>% 
+  ggplot(aes(year,count,color=cohort)) +
+  scale_y_continuous(labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   geom_line(size=1)+
-  facet_wrap(~kin, scales = "free")+
-  labs(x = "Ego's age", "Kin count") + 
+  facet_wrap(~kin,scales = "free")+
+  labs(x = "Year", y = "Kin count") + 
   theme_bw() +
   theme(legend.position = "bottom")
 ```
@@ -648,9 +636,11 @@ swe_period$kins_by_age_ego %>%
 # Get involved!
   
 `DemoKin` is giving its first steps.
-Please contact us via email, or create an issue or submit a pull request on GitHub (https://github.com/IvanWilli/DemoKin).
+Please contact us via email, or create an issue or submit a pull request on GitHub.
 You can also get in touch directly: 
   
+- GitHub: 
+    + https://github.com/IvanWilli/DemoKin
 - Ivan: 
     + ivanwilliams1985[at]gmail.com
     + https://twitter.com/ivanchowilliams
@@ -660,14 +650,15 @@ You can also get in touch directly:
     + https://twitter.com/d_alburez
     + www.alburez.me
 
-# Citation
+# Acknowledgement
 
-Williams, Iván, Alburez-Gutierrez, Diego and Xi Song. (2021) "DemoKin: An R package to compute kinship networks in stable and non-stable populations." URL: <https://github.com/IvanWilli/DemoKin>.
+We thank Hal Caswell for sharing code and data from his Demographic Research papers. 
+Mallika Snyder provided useful comments on an earlier version of this handout.
 
 
 # Appendix: Obtaining U matrix from a life table {#appendix}
 
-Here, we show how to estimate the argument **U** from `DemoKin::kins()` (survival ratio by age from a life table) from a standard life table.
+Here, we show how to estimate the argument **U** from `DemoKin::kin()` (survival ratio by age from a life table) from a standard life table.
 The code is part of the function `DemoKin::get_HMDHFD()`.
 For this example, we use Swedish period life tables from the Human Mortality Database. 
 
