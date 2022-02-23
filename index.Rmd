@@ -69,23 +69,21 @@ stable <-
     , f = swe_asfr
     , stable = TRUE
     , focal_year = 1950
-    , selected_kin = NULL
-    , living = TRUE
     )
 ```
 
 ### Arguments
 
-- **U** matrix; survival ratio by age from a life table 
-- **f** matrix; age specific fertility rate by age (simple ages). 
-- **N** matrix; only needed for non-stable computation 
-- **stable** logical string 
-- **focal_year** string; period years of interest
-- **focal_cohort** string; birth cohorts of interest
-- **pi** matrix; distribution of ages of mothers (see Caswell [@-caswell_formal_2019])
+- **U** matrix; numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
+- **f** numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
+- **N** numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year (only needed for non-stable computation)
+- **pi** numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
+- **stable** logical. Stable assumption given year rates, taking focal_year in case is U and f are matrix.
+- **focal_cohort** integer. Year of birth of focal. Could be a vector. Should be within input data years range.
+- **focal_year** integer. Year of focal. Could be a vector. Should be within input data years range.
 - **birth_female** numeric; proportion of births that are female
-- **selected_kin** string; relatives to compute. If `NULL`, return values for all relatives
-- **living** logical; whether to compute values for living or deceased relatives 
+- **selected_kin** character. kin to return: "m" for mother, "d" for daughter... If `NULL`, return values for all relatives
+- **living** logical. Only living kin counts TRUE, or including death kin FALSE.
 
 Note that `DemoKin` only requires period demographic rate data as input!
 
@@ -153,7 +151,7 @@ image.plot(
 This is what the data looks like:
 
 ```{r}
-swe_asfr[1:4, 1:4]
+swe_asfr[15:20, 1:4]
 ```
 
 And plotted over time and age:
@@ -168,7 +166,7 @@ image.plot(
   )
 ```
 
-### `swe_pop` matrix; population by age (Demokin's *N* argument)
+### `swe_pop` matrix; population by age (DemoKin's *N* argument)
 
 This is what the data looks like:
 
@@ -191,6 +189,10 @@ image.plot(
 ## Value
 
 `DemoKin::kin()` returns a list containing two data frames: `kin_full` and `kin_summary`. 
+
+```{r}
+str(stable)
+```
 
 ### `kin_full` 
 
@@ -249,7 +251,7 @@ system.time(
 
 ## 'Keyfitz' kinship diagram
 
-We can visualize the implied kin counts for an Focal aged 35 yo in a stable population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] using the `plot_diagram` function:
+We can visualize the implied kin counts for a Focal woman aged 35 yo in a stable population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] using the `plot_diagram` function:
 
 ```{r, fig.height=10, fig.width=12}
 stable$kin_summary %>% 
@@ -259,7 +261,7 @@ stable$kin_summary %>%
 ```
 
 
-## Expected kin counts for an Focal surviving to each age
+## Expected kin counts for a Focal person surviving to each age
 
 Before showing the results, we define a simple function to identify relatives based on their respective codes.
 The kinship codes (e.g., "gm", "ggm") are useful for filtering the data but confusing for visualization. 
@@ -418,7 +420,7 @@ loss2 %>%
 
 ```
 
-An member of the population aged 15, 50, and 65yo will have experienced, on average, the death of `r loss2 %>% filter(age_focal %in% c(15, 50, 65)) %>% pull(count) %>% round(1) %>% paste(., collapse = ", ")` relatives, respectively. 
+A member of the population aged 15, 50, and 65yo will have experienced, on average, the death of `r loss2 %>% filter(age_focal %in% c(15, 50, 65)) %>% pull(count) %>% round(1) %>% paste(., collapse = ", ")` relatives, respectively. 
 We can decompose this by relative type:
 
 ```{r}
@@ -438,7 +440,7 @@ stable_death$kin_summary %>%
 
 ## Age distribution of relatives
 
-How old are Focal's relatives? Using the `kin` data frame, we can visualize the age distribution of Focal's relatives throughout Focal's life. 
+How old are Focal's relatives? Using the `kin_full` data frame, we can visualize the age distribution of Focal's relatives throughout Focal's life. 
 As an example, let's pick three points of Focal's life: when she's born (age=0) at the end of her reproductive life (age=50) and when she retires (age=65).
 
 ```{r, fig.height=6, fig.width=8}
@@ -456,7 +458,7 @@ stable$kin_full %>%
 ```
 
 The output of the `DemoKin::kin()` function can also be used to easily determine the mean age Focal's relatives by kin type. 
-For simplicity, let's focus on an Focal aged 35 yo and get the mean age (and standard deviation) of her relatives in our stable population. 
+For simplicity, let's focus on a Focal aged 35 yo and get the mean age (and standard deviation) of her relatives in our stable population. 
 
 ```{r}
 ages_df <- 
@@ -478,7 +480,7 @@ sda <-
 
 ```
 
-We can say that the mothers of Focal would be, on average, `r ma` years old, with a standard deviation of `r sda` years. 
+**We can say that the mother of a 35-yo Focal woman in our stable population is, on average, `r ma` years old, with a standard deviation of `r sda` years.**
 
 # Example 2: population with changing rates
 
